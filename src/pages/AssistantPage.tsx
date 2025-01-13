@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Wand2, ChevronRight, ChevronLeft, Usb, Wifi, AppWindow, User } from 'lucide-react';
+import { Wand2, ChevronRight, ChevronLeft, Usb, Wifi, AppWindow, User, LandPlot } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import GradientHeader from '../components/GradientHeader';
 
 // Importation dynamique des images
 import casqueUSB from '/images/casqueUSB.webp';
 import casqueWIFI from '/images/casqueWIFI.webp';
-import casqueApp from '/images/casqueApp.webp';
-import casqueUser from '/images/casqueUser.webp';
+import casqueApp from '/images/casqueUser.webp';
+import casqueUser from '/images/casqueFinal.webp';
 
 export function AssistantPage() {
   const { t } = useTranslation();
@@ -23,32 +23,33 @@ export function AssistantPage() {
   const assistantSteps: AssistantStep[] = [
     {
       title: t('assistant.welcome', 'Bienvenue dans votre Assistant XR'),
-      description: t('assistant.welcome_desc', 'Cet assistant va vous guider à travers les fonctionnalités principales de votre gestionnaire XR.'),
+      description: t('assistant.welcome_desc', 'Connecter d\'abord votre casque via le port USB.'),
       icon: <Usb className="w-6 h-6 text-indigo-500" />,
       image: casqueUSB,
     },
     {
       title: t('assistant.device_management', 'Gestion des Appareils'),
-      description: t('assistant.device_management_desc', 'Découvrez comment surveiller et gérer vos appareils XR.'),
+      description: t('assistant.device_management_desc', 'Maintenant la connexion sans fil va démarrer.'),
       icon: <Wifi className="w-6 h-6 text-indigo-500" />,
       image: casqueWIFI,
     },
     {
-      title: t('assistant.applications', 'Gestion des Applications'),
-      description: t('assistant.applications_desc', 'Apprenez à déployer et gérer des applications sur vos appareils.'),
+      title: t('assistant.applications', 'Informations utilisateur'),
+      description: t('assistant.applications_desc', 'Entrer le nom utilisateur qui sera associé à ce casque.'),
       icon: <User className="w-6 h-6 text-indigo-500" />,
-      image: casqueUser,
+      image: casqueApp,
     },
     {
       title: t('assistant.complete', 'Configuration Terminée'),
-      description: t('assistant.complete_desc', 'Félicitations ! Vous êtes maintenant prêt à utiliser votre gestionnaire XR.'),
-      icon: null,
-      image: casqueApp,
+      description: t('assistant.complete_desc', 'Félicitations ! Vous êtes maintenant prêt à utiliser votre casque XR.'),
+      icon: <LandPlot className="w-6 h-6 text-indigo-500" />,
+      image: casqueUser,
     }
   ];
 
   const handleNext = () => {
     if (currentStep < assistantSteps.length - 1) {
+      handleActionStep(currentStep);
       setCurrentStep(currentStep + 1);
     }
   };
@@ -56,6 +57,22 @@ export function AssistantPage() {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleActionStep = (currentStep: number) => {
+    // Logique de traitement de l'action
+    if (currentStep === 0) {
+      // Logique de connexion USB
+    }
+    if (currentStep === 1) {
+      // Logique de connexion sans fil
+    }
+    if  (currentStep === 2) {
+      // Logique de gestion des applications
+    }
+    if  (currentStep === 3) {
+      // Logique de configuration complète
     }
   };
 
@@ -101,7 +118,7 @@ export function AssistantPage() {
           {currentStep < assistantSteps.length - 1 ? (
             <button
               onClick={handleNext}
-              className="flex items-center ml-auto text-violet-500 hover:text-violet-700"
+              className="flex items-center ml-auto text-violet-500 hover:text-violet-700 py-2 "
             >
               {t('assistant.next', 'Suivant')} <ChevronRight className="ml-2" />
             </button>

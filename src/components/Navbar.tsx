@@ -124,97 +124,108 @@ export function Navbar({
   };
 
   return (
-    <nav className="bg-white shadow-sm">
+    <nav className="bg-gray-900 text-gray-100 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center space-x-4">
-              <Glasses className="h-8 w-8 text-gray-900" />
-              <span className="text-xl font-bold text-gray-900">
-                {t('app.name', 'XR Oculus Manager')}
-              </span>
-            </div>            
-        
-            {/* Menu hamburger visible uniquement sur les écrans md et plus petits */}
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo et bouton sidebar */}
+          <div className="flex items-center space-x-4">
             <button 
               onClick={onToggleSidebar} 
-              className="md:hidden ml-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-200 focus:outline-none"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-6 w-6" />
             </button>
+            
+            <div className="flex items-center space-x-2">
+              <div className="p-1.5 bg-violet-800/30 rounded-lg">
+                <Glasses className="h-5 w-5 text-violet-400" />
+              </div>
+              <span className="text-lg font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
+                Gestionnaire VR
+              </span>
+            </div>
           </div>
 
-          <div className="ml-4 flex items-center space-x-4">
-            {/* Conteneur pour les icônes de droite */}
-            {isAuthenticated && (
-              <div className="flex items-center space-x-3 mr-3">
-                {/* Notifications */}
-                <button 
-                  ref={buttonRef}
-                  onClick={() => setShowAlerts(!showAlerts)} 
-                  className="text-gray-400 hover:text-gray-600 transition-colors relative"
-                >
-                  <Bell className="h-5 w-5" />
-                  {alerts.filter(a => !a.read).length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[0.6rem] rounded-full h-3.5 w-3.5 flex items-center justify-center">
-                      {alerts.filter(a => !a.read).length}
-                    </span>
-                  )}
-                </button>
+          {/* Navigation et actions */}
+          <div className="flex items-center space-x-4">
+            {/* Notifications */}
+            <button 
+              ref={buttonRef}
+              onClick={() => setShowAlerts(!showAlerts)} 
+              className="relative text-gray-400 hover:text-gray-200"
+            >
+              <Bell className="h-5 w-5" />
+              {alerts.filter(alert => !alert.read).length > 0 && (
+                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+              )}
+            </button>
 
-                {/* Paramètres */}
-                <button 
-                  onClick={() => onNavigate('settings')} 
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+            {/* Boutons de navigation */}
+            <div className="hidden md:flex space-x-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => onNavigate('settings')}
+                className="text-gray-400 hover:text-gray-200"
+              >
+                <Settings className="h-4 w-4 mr-1" />
+                {t('navbar.settings', 'Paramètres')}
+              </Button>
+
+              {isAuthenticated ? (
+                <Button 
+                  variant="gradient" 
+                  onClick={onSignOut}
+                  className="text-gray-400 hover:text-gray-200"
                 >
-                  <Settings className="h-5 w-5" />
-                </button>
-              </div>
-            )}
-            
-            {isAuthenticated ? (
-              <Button 
-                variant="gradient" 
-                onClick={onSignOut}
-                className="flex items-center"
-              >
-                <FiLogOut className="mr-2" />
-                {t('navbar.signout', 'Se déconnecter')}
-              </Button>
-            ) : (
-              <Button 
-                variant="gradient" 
-                onClick={() => onNavigate('dashboard')}
-                className="flex items-center"
-              >
-                <LogIn className="mr-2 h-5 w-5" />
-                {t('navbar.signin', 'Se connecter')}
-              </Button>
-            )}
+                  <FiLogOut className="h-4 w-4 mr-1" />
+                  {t('navbar.logout', 'Déconnexion')}
+                </Button>
+              ) : (
+                <Button 
+                  variant="gradient" 
+                  onClick={() => onNavigate('settings')}
+                  className="text-gray-400 hover:text-gray-200"
+                >
+                  <LogIn className="h-4 w-4 mr-1" />
+                  {t('navbar.login', 'Connexion')}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Menu des alertes */}
       {showAlerts && (
         <div 
           ref={alertsRef} 
-          className="absolute right-0 top-full mt-2 w-64 bg-gray-800 rounded-md shadow-lg border border-gray-700"
+          className="absolute right-0 mt-2 mr-4 w-80 bg-gray-800 rounded-lg shadow-lg z-50"
         >
           {/* Contenu des alertes */}
-          {alerts.length === 0 ? (
-            <p className="text-xs text-gray-500 p-4 text-center">
-              {t('navbar.no_alerts', 'Aucune nouvelle alerte')}
-            </p>
-          ) : (
-            alerts.map(alert => (
-              <div 
-                key={alert.id} 
-                className="p-3 border-b border-gray-700 last:border-b-0 hover:bg-gray-700 transition-colors"
-              >
-                <p className="text-xs text-gray-300">{alert.title}</p>
-                <p className="text-[0.6rem] text-gray-500">{alert.message}</p>
-              </div>
-            ))
-          )}
+          <div className="p-4">
+            <h3 className="text-sm font-semibold text-gray-300 mb-2">
+              {t('navbar.alerts', 'Alertes récentes')}
+            </h3>
+            {alerts.length === 0 ? (
+              <p className="text-xs text-gray-500">
+                {t('navbar.no_alerts', 'Aucune alerte')}
+              </p>
+            ) : (
+              alerts.map((alert) => (
+                <div 
+                  key={alert.id} 
+                  className={`p-2 mb-2 rounded ${
+                    alert.type === 'warning' ? 'bg-yellow-900/30 text-yellow-400' :
+                    alert.type === 'error' ? 'bg-red-900/30 text-red-400' :
+                    'bg-blue-900/30 text-blue-400'
+                  } text-xs`}
+                >
+                  <div className="font-semibold">{alert.title}</div>
+                  <div>{alert.message}</div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
     </nav>
