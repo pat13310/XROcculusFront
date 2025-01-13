@@ -34,7 +34,7 @@ export function DeviceDetailsPage({ deviceId, onBack }: DeviceDetailsPageProps) 
         className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
       >
         <ChevronLeft className="w-5 h-5 mr-1" />
-        Back to Devices
+        Retour
       </button>
       <DeviceHeader device={device} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

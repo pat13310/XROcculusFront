@@ -6,6 +6,7 @@ import {
   Settings,
   Activity,
   FileText,
+  Wand2,
 } from 'lucide-react';
 import { NavLink } from './navigation/NavLink';
 import { useTranslation } from '../contexts/TranslationContext';
@@ -57,6 +58,11 @@ export function Sidebar({
       icon: FileText,
       label: t('sidebar.reports', 'Rapports'),
       page: 'reports' as Page,
+    },
+    {
+      icon: Wand2,
+      label: t('sidebar.assistant', 'Assistant'),
+      page: 'assistant' as Page,
     },
     {
       icon: Users,

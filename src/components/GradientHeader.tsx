@@ -16,7 +16,7 @@ const GradientHeader: React.FC<HeaderProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div className="relative pb-4 mb-8">
+    <div className="relative pb-4 mb-6">
       {/* Titre et Icône */}
       <div className="flex items-center space-x-4 mb-3">
         {/* Conteneur de l'icône */}

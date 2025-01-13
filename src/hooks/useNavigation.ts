@@ -3,7 +3,7 @@ import { createLogger } from '../utils/logger';
 
 const logger = createLogger('Navigation');
 
-export type Page = 'dashboard' | 'settings' | 'devices' | 'device-details' | 'applications' | 'users' | 'analytics' | 'reports';
+export type Page = 'dashboard' | 'settings' | 'devices' | 'device-details' | 'applications' | 'users' | 'analytics' | 'reports' | 'assistant';
 
 export function useNavigation() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');

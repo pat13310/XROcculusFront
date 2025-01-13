@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
 import { createLogger } from '../utils/logger';
 import type { Page } from '../hooks/useNavigation';
+import { useAuth } from '../hooks/useAuth';
 
 const logger = createLogger('Layout');
 
@@ -16,6 +17,7 @@ interface LayoutProps {
 
 export function Layout({ children, onNavigate, currentPage, deviceCount }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isAuthenticated, signOut } = useAuth();
 
   useEffect(() => {
     logger.info('Layout mounted', { currentPage });
@@ -34,7 +36,10 @@ export function Layout({ children, onNavigate, currentPage, deviceCount }: Layou
       <Navbar 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onNavigate={handleNavigate}
-        currentPage={currentPage}       />
+        currentPage={currentPage}
+        isAuthenticated={isAuthenticated}
+        onSignOut={signOut}
+      />
       
       <div className="flex-1 flex">
         <Sidebar 

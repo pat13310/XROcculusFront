@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Dashboard } from '../pages/Dashboard';
-import { Settings } from '../pages/Settings';
-import { Applications } from '../pages/Applications';
-import { Users } from '../pages/Users';
-import { Analytics } from '../pages/Analytics';
-import { Reports } from '../pages/Reports';
+import { Settings } from '../pages/SettingsPage';
+import { Applications } from '../pages/ApplicationsPage';
+import { Users } from '../pages/UsersPage';
+import { Analytics } from '../pages/AnalyticsPage';
+import { Reports } from '../pages/ReportsPage';
 import { DeviceList } from './DeviceList';
 import { DeviceDetailsPage } from '../pages/DeviceDetailsPage';
 import { useDevices } from '../hooks/useDevices';

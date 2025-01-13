@@ -1,5 +1,3 @@
-import React from 'react';
-import { AuthLayout } from './components/auth/AuthLayout';
 import { AppLayout } from './components/app/AppLayout';
 import { LandingPage } from './pages/LandingPage';
 import { useAuth } from './hooks/useAuth';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Monitor, Battery, HardDrive, Activity } from 'lucide-react';
 import type { DeviceStats } from '../types';
 

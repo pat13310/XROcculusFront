@@ -1,15 +1,14 @@
-import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Monitor, Battery, HardDrive, Activity, Gauge } from 'lucide-react';
 import { DeviceList } from '../components/DeviceList';
 import { StatCard } from '../components/dashboard/StatCard';
 import { GradientProgressBar } from '../components/dashboard/GradientProgressBar';
 import { LoadingScreen } from '../components/LoadingScreen';
-import { useTranslation } from '../contexts/TranslationContext';
 import { formatBytes } from '../utils/formatters';
 import type { Device, DeviceStats } from '../types';
 import GradientHeader from '../components/GradientHeader';
 
-interface DashboardProps {
+export interface DashboardProps {
   stats: DeviceStats;
   devices: Device[];
   devicesLoading: boolean;
@@ -26,7 +25,7 @@ export function Dashboard({
 }: DashboardProps) {
   const { t } = useTranslation();
 
-  // Calculate stats safely
+  // Calcul des statistiques en toute sécurité
   const avgBattery = stats.batteryLevels.length > 0
     ? Math.round(stats.batteryLevels.reduce((a, b) => a + b, 0) / stats.batteryLevels.length)
     : 0;
@@ -36,7 +35,6 @@ export function Dashboard({
 
   return (
     <div className="space-y-8">
-      {/* En-tête avec dégradé */}
       <GradientHeader
         titleKey="dashboard.title"
         defaultTitle="Tableau de bord"

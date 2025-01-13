@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useCallback } from 'react';
-import { useTranslations } from '../hooks/useTranslations';
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../hooks/useSettings';
 
 interface TranslationContextType {
@@ -11,24 +11,24 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType>({
   t: (key: string, fallback?: string) => fallback || key,
-  loading: true,
+  loading: false,
   setLanguage: () => {},
-  currentLanguage: 'en'
+  currentLanguage: 'fr'
 });
 
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
   const { settings, updateSettings } = useSettings();
-  const { t, loading, refreshTranslations } = useTranslations(settings.language);
+  const { t, i18n } = useTranslation();
 
   const setLanguage = useCallback((lang: string) => {
     updateSettings({ language: lang });
-    refreshTranslations(lang);
-  }, [updateSettings, refreshTranslations]);
+    i18n.changeLanguage(lang);
+  }, [updateSettings, i18n]);
 
   return (
     <TranslationContext.Provider value={{ 
       t, 
-      loading, 
+      loading: false, 
       setLanguage,
       currentLanguage: settings.language 
     }}>
@@ -37,6 +37,8 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
   );
 }
 
-export function useTranslation() {
+export function useCustomTranslation() {
   return useContext(TranslationContext);
 }
+
+export { useTranslation };

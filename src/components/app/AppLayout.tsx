@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Dashboard } from '../../pages/Dashboard';
-import { Settings } from '../../pages/Settings';
-import { Applications } from '../../pages/Applications';
-import { Users } from '../../pages/Users';
+import { Settings } from '../../pages/SettingsPage';
+import { Applications } from '../../pages/ApplicationsPage';
+import { Users } from '../../pages/UsersPage';
 import { DeviceList } from '../DeviceList';
 import { DeviceDetailsPage } from '../../pages/DeviceDetailsPage';
 import { useDevices } from '../../hooks/useDevices';
 import { Layout } from '../Layout';
 import type { Page } from '../../hooks/useNavigation';
-import { Reports } from '../../pages/Reports';
+import { Reports } from '../../pages/ReportsPage';
+import { AssistantPage } from '../../pages/AssistantPage';
 
 export function AppLayout() {
   const { devices, stats, loading: devicesLoading } = useDevices();
@@ -54,6 +55,7 @@ export function AppLayout() {
       {currentPage === 'applications' && <Applications />}
       {currentPage === 'users' && <Users />}
       {currentPage === 'reports' && <Reports />}
+      {currentPage === 'assistant' && <AssistantPage />}
       {currentPage === 'device-details' && selectedDevice && (
         <DeviceDetailsPage 
           deviceId={selectedDevice}

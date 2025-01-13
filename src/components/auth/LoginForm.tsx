@@ -86,10 +86,10 @@ export function LoginForm() {
         {loading ? (
           <>
             <Loader className="animate-spin -ml-1 mr-2 h-4 w-4" />
-            {t('auth.signing_in', 'Signing in...')}
+            {t('auth.signing_in', 'Connexion ...')}
           </>
         ) : (
-          t('auth.sign_in', 'Sign in')
+          t('auth.sign_in', 'Se Coonecter')
         )}
       </button>
     </form>

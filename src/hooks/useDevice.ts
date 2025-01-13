@@ -22,7 +22,7 @@ export function useDevice(deviceId: string) {
         if (mounted) setDevice(data);
       } catch (err) {
         if (mounted) {
-          setError(err instanceof Error ? err : new Error('Failed to load device'));
+          setError(err instanceof Error ? err : new Error('Impossible de charger le dispositif'));
         }
       } finally {
         if (mounted) {

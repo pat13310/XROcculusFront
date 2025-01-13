@@ -1,10 +1,25 @@
 import React from 'react';
 import { Glasses, Shield, Zap, Users, ChevronRight, ArrowRight } from 'lucide-react';
+import { Navbar } from '../components/Navbar';
 import { LoginForm } from '../components/auth/LoginForm';
 import { useTranslation } from '../contexts/TranslationContext';
+import { Footer } from '../components/Footer';
+import { useAuth } from '../hooks/useAuth';
 
 export function LandingPage() {
   const { t } = useTranslation();
+  const { isAuthenticated, signOut } = useAuth();
+
+  // Props par défaut pour le Navbar sur la page de connexion
+  const handleToggleSidebar = () => {};
+  const handleNavigate = (page: 'dashboard' | 'settings' | 'devices' | 'device-details' | 'analytics' | 'users' | 'reports' | 'applications') => {
+    // Scroll to login form when 'dashboard' is clicked
+    const loginSection = document.getElementById('login-section');
+    if (loginSection) {
+      loginSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  const currentPage = 'dashboard' as const;
 
   const features = [
     {
@@ -29,28 +44,14 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-neutral-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center space-x-3">
-              <Glasses className="h-8 w-8 text-gray-900" />
-              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                {t('landing.title', 'Gestionnaire de Périphériques VR')}
-              </span>
-            </div>
-            <button 
-              onClick={() => document.getElementById('login-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 transition-colors duration-200 flex items-center space-x-2"
-            >
-              <span>{t('landing.sign_in', 'Se Connecter')}</span>
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </header>
+      <Navbar 
+        onToggleSidebar={handleToggleSidebar}
+        onNavigate={handleNavigate}
+        currentPage={currentPage}
+        isAuthenticated={isAuthenticated}
+        onSignOut={signOut}
+      />
 
-      {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 text-center">
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900 mb-6">
           {t('landing.hero.title', 'Gérez Vos Appareils VR')}
@@ -124,7 +125,7 @@ export function LandingPage() {
       </div>
 
       {/* Login Section */}
-      <section id="login-section" className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <section id="login-section" className="max-w-md mx-auto py-12">
         <div className="bg-white p-8 rounded-xl shadow-2xl">
           <h2 className="text-2xl font-bold text-center mb-6">
             {t('landing.login.title', 'Connexion')}
@@ -141,26 +142,7 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mt-8 md:flex md:items-center md:justify-between">
-            <div className="flex space-x-6 md:order-2">
-              <a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">
-                {t('footer.privacy_policy', 'Politique de Confidentialité')}
-              </a>
-              <a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">
-                {t('footer.terms', 'Conditions d\'Utilisation')}
-              </a>
-              <a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">
-                {t('footer.contact', 'Contact')}
-              </a>
-            </div>
-            <p className="mt-8 text-base text-gray-500 md:mt-0 md:order-1">
-              {t('footer.copyright', `© ${new Date().getFullYear()} XR Occulus. Tous droits réservés.`)}
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
