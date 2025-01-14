@@ -50,7 +50,7 @@ export function Layout({ children, onNavigate, currentPage, deviceCount }: Layou
           onNavigate={handleNavigate}
         />
         
-        <main className="flex-1 py-8 px-4 sm:px-6 lg:px-8">
+        <main className="flex-1 py-4 px-4 sm:px-6 lg:px-6">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
