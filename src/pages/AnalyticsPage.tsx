@@ -9,7 +9,7 @@ import { LoadingScreen } from '../components/LoadingScreen';
 import { ErrorScreen } from '../components/ErrorScreen';
 import { useTranslation } from '../contexts/TranslationContext';
 
-export function Analytics() {
+export function AnalyticsPage() {
   const { networkMetrics, dataUsage, batteryStats, appStats, consoleStorage, loading, error } = useAnalytics();
   const { t } = useTranslation();
 

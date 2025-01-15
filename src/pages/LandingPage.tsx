@@ -1,25 +1,114 @@
-import React from 'react';
-import { Glasses, Shield, Zap, Users, ChevronRight, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Glasses, Shield, Zap, Users, ChevronRight, ArrowRight, LogOut } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
-import { LoginForm } from '../components/auth/LoginForm';
+import { LoginModal } from '../components/LoginModal';
 import { useTranslation } from '../contexts/TranslationContext';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
 
 export function LandingPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { isAuthenticated, signOut } = useAuth();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // Déterminer la page courante en fonction de l'URL
+  const getCurrentPage = () => {
+    const path = location.pathname;
+    switch (path) {
+      case '/':
+        return 'dashboard';
+      case '/dashboard':
+        return 'dashboard';
+      case '/settings':
+        return 'settings';
+      case '/devices':
+        return 'devices';
+      case '/analytics':
+        return 'analytics';
+      case '/users':
+        return 'users';
+      case '/reports':
+        return 'reports';
+      case '/applications':
+        return 'applications';
+      default:
+        return 'dashboard';
+    }
+  };
+
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'settings' | 'devices' | 'device-details' | 'analytics' | 'users' | 'reports' | 'applications'>(getCurrentPage());
+
+  // Mettre à jour la page courante quand l'URL change
+  useEffect(() => {
+    setCurrentPage(getCurrentPage());
+  }, [location.pathname]);
+
+  // Redirection automatique si authentifié
+  useEffect(() => {
+    if (isAuthenticated && location.pathname === '/') {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate, location.pathname]);
 
   // Props par défaut pour le Navbar sur la page de connexion
   const handleToggleSidebar = () => {};
   const handleNavigate = (page: 'dashboard' | 'settings' | 'devices' | 'device-details' | 'analytics' | 'users' | 'reports' | 'applications') => {
-    // Scroll to login form when 'dashboard' is clicked
-    const loginSection = document.getElementById('login-section');
-    if (loginSection) {
-      loginSection.scrollIntoView({ behavior: 'smooth' });
+    switch(page) {
+      case 'dashboard':
+        navigate('/dashboard');
+        break;
+      case 'settings':
+        navigate('/settings');
+        break;
+      case 'devices':
+        navigate('/devices');
+        break;
+      case 'analytics':
+        navigate('/analytics');
+        break;
+      case 'users':
+        navigate('/users');
+        break;
+      case 'reports':
+        navigate('/reports');
+        break;
+      case 'applications':
+        navigate('/applications');
+        break;
+      default:
+        navigate('/dashboard');
     }
   };
-  const currentPage = 'dashboard' as const;
+
+  const handleOpenLoginModal = () => {
+    setIsLoginModalOpen(true);
+  };
+
+  const handleCloseLoginModal = () => {
+    setIsLoginModalOpen(false);
+  };
+
+  const handleLoginSuccess = () => {
+    navigate('/dashboard');
+  };
+
+  const handleSignOut = () => {
+    // Effacer tous les tokens et informations d'authentification
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('isAuthenticated');
+    
+    // Appeler la fonction de déconnexion du hook useAuth
+    signOut();
+    
+    // Scroll en haut de la page
+    window.scrollTo(0, 0);
+    
+    // Revenir à la page d'accueil
+    navigate('/');
+  };
 
   const features = [
     {
@@ -49,7 +138,8 @@ export function LandingPage() {
         onNavigate={handleNavigate}
         currentPage={currentPage}
         isAuthenticated={isAuthenticated}
-        onSignOut={signOut}
+        onSignOut={handleSignOut}
+        onLogin={handleOpenLoginModal}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 text-center">
@@ -67,12 +157,32 @@ export function LandingPage() {
             <span>{t('landing.hero.learn_more', 'En Savoir Plus')}</span>
             <ArrowRight className="h-5 w-5" />
           </a>
-          <a 
-            href="#login-section" 
-            className="px-6 py-3 border border-gray-300 text-gray-900 rounded-md hover:bg-gray-50 transition-colors duration-200"
-          >
-            {t('landing.hero.get_started', 'Commencer')}
-          </a>
+          
+          {isAuthenticated ? (
+            <div className="flex space-x-4">
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200 flex items-center space-x-2"
+              >
+                <span>{t('landing.hero.go_to_dashboard', 'Aller au Dashboard')}</span>
+                <ChevronRight className="h-5 w-5" />
+              </button>
+              <button 
+                onClick={handleSignOut}
+                className="px-6 py-3 border border-red-300 text-red-600 rounded-md hover:bg-red-50 transition-colors duration-200 flex items-center space-x-2"
+              >
+                <LogOut className="h-5 w-5 mr-2" />
+                <span>{t('landing.hero.sign_out', 'Déconnexion')}</span>
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={handleOpenLoginModal}
+              className="px-6 py-3 border border-gray-300 text-gray-900 rounded-md hover:bg-gray-50 transition-colors duration-200"
+            >
+              {t('landing.hero.get_started', 'Commencer')}
+            </button>
+          )}
         </div>
 
         {/* Features Section */}
@@ -88,61 +198,52 @@ export function LandingPage() {
             </div>
           ))}
         </section>
+
+        {/* Stats Section */}
+        <div className="bg-gray-900 py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold text-white">
+                {t('landing.stats.title', 'Notre Impact')}
+              </h2>
+              <p className="mt-4 text-gray-300">
+                {t('landing.stats.subtitle', 'Des chiffres qui montrent notre engagement envers la gestion des appareils VR')}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3 text-center">
+              <div>
+                <p className="text-5xl font-extrabold text-white mb-2">500+</p>
+                <p className="text-gray-300">
+                  {t('landing.stats.devices_managed', 'Appareils Gérés')}
+                </p>
+              </div>
+              <div>
+                <p className="text-5xl font-extrabold text-white mb-2">99.9%</p>
+                <p className="text-gray-300">
+                  {t('landing.stats.uptime', 'Temps de Disponibilité')}
+                </p>
+              </div>
+              <div>
+                <p className="text-5xl font-extrabold text-white mb-2">24/7</p>
+                <p className="text-gray-300">
+                  {t('landing.stats.support', 'Support Client')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <Footer />
+
+        {/* Login Modal */}
+        {isLoginModalOpen && (
+          <LoginModal 
+            onClose={handleCloseLoginModal}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        )}
       </main>
-
-      {/* Stats Section */}
-      <div className="bg-gray-900 py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white">
-              {t('landing.stats.title', 'Notre Impact')}
-            </h2>
-            <p className="mt-4 text-gray-300">
-              {t('landing.stats.subtitle', 'Des chiffres qui montrent notre engagement envers la gestion des appareils VR')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3 text-center">
-            <div>
-              <p className="text-5xl font-extrabold text-white mb-2">500+</p>
-              <p className="text-gray-300">
-                {t('landing.stats.devices_managed', 'Appareils Gérés')}
-              </p>
-            </div>
-            <div>
-              <p className="text-5xl font-extrabold text-white mb-2">99.9%</p>
-              <p className="text-gray-300">
-                {t('landing.stats.uptime', 'Temps de Disponibilité')}
-              </p>
-            </div>
-            <div>
-              <p className="text-5xl font-extrabold text-white mb-2">24/7</p>
-              <p className="text-gray-300">
-                {t('landing.stats.support', 'Support Client')}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Login Section */}
-      <section id="login-section" className="max-w-md mx-auto py-12">
-        <div className="bg-white p-8 rounded-xl shadow-2xl">
-          <h2 className="text-2xl font-bold text-center mb-6">
-            {t('landing.login.title', 'Connexion')}
-          </h2>
-          <LoginForm />
-          <p className="mt-6 text-center text-sm text-gray-600">
-            {t('landing.login.no_account', "Vous n'avez pas de compte?")}
-            {' '}
-            <a href="#" className="text-gray-900 hover:text-gray-700 font-medium">
-              {t('landing.login.contact_admin', 'Contactez votre administrateur')}
-            </a>
-          </p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

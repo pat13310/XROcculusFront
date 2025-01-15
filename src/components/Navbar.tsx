@@ -5,6 +5,9 @@ import { supabase } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
 import Button from './ui/Button';
 import { FiLogOut } from 'react-icons/fi';
+import { LoginModal } from './LoginModal';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const logger = createLogger('Navbar');
 
@@ -14,6 +17,7 @@ interface NavbarProps {
   currentPage: 'dashboard' | 'settings' | 'devices' | 'device-details' | 'analytics' | 'users' | 'reports' | 'applications';
   isAuthenticated: boolean;
   onSignOut: () => void;
+  onLogin?: () => void;
 }
 
 interface Alert {
@@ -28,13 +32,16 @@ interface Alert {
 export function Navbar({
   onToggleSidebar,
   onNavigate,
-  currentPage,
   isAuthenticated,
-  onSignOut
-}: NavbarProps) {
+  onLogin
+}: Omit<NavbarProps, 'onSignOut'>) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
+  const { signOut } = useAuth(); // Utiliser le hook useAuth directement
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const alertsRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -118,9 +125,23 @@ export function Navbar({
 
   const unreadCount = alerts.filter(alert => !alert.read).length;
 
-  const handleDeviceDetails = (deviceId: string) => {
-    onNavigate('device-details');
-    // Vous pouvez également passer l'ID du device si nécessaire
+  // Gestionnaire de navigation personnalisé
+  const handleCustomNavigation = (page: 'dashboard' | 'settings' | 'devices' | 'device-details' | 'analytics' | 'users' | 'reports' | 'applications') => {
+    // Si l'utilisateur est connecté et tente de naviguer alors qu'il est déjà sur la page de landing
+    if (isAuthenticated && location.pathname === '/') {
+      // Rediriger vers le dashboard
+      navigate('/dashboard');
+    } else {
+      // Sinon, utiliser la navigation normale
+      onNavigate(page);
+    }
+  };
+
+  const handleSignOut = () => {
+    signOut(); // Déconnexion
+    
+    // Forcer la navigation vers la page d'accueil
+    window.location.href = '/'; // Rechargement complet de la page
   };
 
   return (
@@ -162,33 +183,50 @@ export function Navbar({
 
             {/* Boutons de navigation */}
             <div className="hidden md:flex space-x-2">
-              <Button 
-                variant="ghost" 
-                onClick={() => onNavigate('settings')}
-                className="text-gray-400 hover:text-gray-200"
-              >
-                <Settings className="h-4 w-4 mr-1" />
-                {t('navbar.settings', 'Paramètres')}
-              </Button>
-
               {isAuthenticated ? (
-                <Button 
-                  variant="gradient" 
-                  onClick={onSignOut}
-                  className="text-gray-400 hover:text-gray-200"
-                >
-                  <FiLogOut className="h-4 w-4 mr-1" />
-                  {t('navbar.logout', 'Déconnexion')}
-                </Button>
+                <>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleCustomNavigation('dashboard')}
+                    className="text-gray-400 hover:text-gray-200"
+                  >
+                    Tableau de bord
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleCustomNavigation('settings')}
+                    className="text-gray-400 hover:text-gray-200"
+                  >
+                    <Settings className="h-4 w-4 mr-1" />
+                    {t('navbar.settings', 'Paramètres')}
+                  </Button>
+                  <Button 
+                    variant="gradient" 
+                    onClick={handleSignOut}
+                    className="text-gray-400 hover:text-gray-200"
+                  >
+                    <FiLogOut className="h-4 w-4 mr-1" />
+                    {t('navbar.logout', 'Déconnexion')}
+                  </Button>
+                </>
               ) : (
-                <Button 
-                  variant="gradient" 
-                  onClick={() => onNavigate('settings')}
-                  className="text-gray-400 hover:text-gray-200"
-                >
-                  <LogIn className="h-4 w-4 mr-1" />
-                  {t('navbar.login', 'Connexion')}
-                </Button>
+                <>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => navigate('/')}
+                    className="text-gray-400 hover:text-gray-200"
+                  >
+                    Accueil
+                  </Button>
+                  <Button 
+                    variant="gradient" 
+                    onClick={() => setShowLoginModal(true)}
+                    className="text-gray-400 hover:text-gray-200"
+                  >
+                    <LogIn className="h-4 w-4 mr-1" />
+                    {t('navbar.login', 'Connexion')}
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -227,6 +265,16 @@ export function Navbar({
             )}
           </div>
         </div>
+      )}
+      {showLoginModal && (
+        <LoginModal 
+          onClose={() => setShowLoginModal(false)} 
+          onLoginSuccess={() => {
+            setShowLoginModal(false);
+            onNavigate('dashboard');
+          }} 
+          onNavigate={onNavigate}
+        />
       )}
     </nav>
   );

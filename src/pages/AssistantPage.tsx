@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wand2, ChevronRight, ChevronLeft, Usb, Wifi, AppWindow, User, LandPlot, AlertCircle, CheckCircle, WifiOff } from 'lucide-react';
+import { Wand2, ChevronRight, ChevronLeft, Usb, Wifi,  User, LandPlot, AlertCircle, CheckCircle, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import GradientHeader from '../components/GradientHeader';
 import { ConnectionModalContent } from '../components/ConnectionModalContent';

@@ -58,17 +58,27 @@ window.fetch = async (...args) => {
 // Vérifier la connexion
 export async function checkSupabaseConnection() {
   try {
-    const { data, error } = await supabase.from('system_logs').select('count').limit(1);
-    if (error) throw error;
+    console.log('🔍 Vérification de la connexion Supabase...');
+    
+    // Vérifier la connexion avec différentes méthodes
+    const systemLogsCheck = await supabase.from('system_logs').select('count').limit(1);
+    console.log('✅ Résultat system_logs:', systemLogsCheck);
+
+    const authCheck = await supabase.auth.getUser();
+    console.log('✅ Vérification authentification:', authCheck);
+
+    if (systemLogsCheck.error) throw systemLogsCheck.error;
+    
     logger.info('Connexion Supabase établie avec succès');
     return true;
   } catch (error) {
+    console.error('🚫 Échec de la connexion Supabase:', error);
     logger.error('Échec de la connexion Supabase:', error);
     return false;
   }
 }
 
-// Initialiser la connexion au démarrage
-checkSupabaseConnection().catch(() => {
-  logger.warn('Impossible de vérifier la connexion Supabase');
+// Tester la connexion immédiatement
+checkSupabaseConnection().then(result => {
+  console.log('🔐 Résultat de la connexion Supabase:', result);
 });
