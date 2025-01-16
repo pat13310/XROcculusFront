@@ -33,8 +33,9 @@ export function Navbar({
   onToggleSidebar,
   onNavigate,
   isAuthenticated,
-  onLogin
-}: Omit<NavbarProps, 'onSignOut'>) {
+  onLogin,
+  onSignOut
+}: Omit<NavbarProps, 'currentPage'>) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -189,7 +190,7 @@ export function Navbar({
                     onClick={() => handleCustomNavigation('settings')}
                     className="text-gray-400 hover:text-gray-200 xs:text-xs xs:px-2 xs:py-1 md:text-sm md:px-4 md:py-2"
                   >
-                    <Settings className="h-4 w-4 xs:h-3 xs:w-3 mr-1" />
+                    <Settings className="text-gray-400 hover:text-gray-200 h-5 w-5 xs:h-3 xs:w-3 mr-1" />
                   </Button>
                   <Button
                     variant="gradient"

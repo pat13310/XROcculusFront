@@ -13,5 +13,6 @@ export interface DeviceStats {
   totalDevices: number;
   activeDevices: number;
   storageUsed: number;
+  storageTotal: number;
   batteryLevels: number[];
 }

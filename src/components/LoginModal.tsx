@@ -3,6 +3,8 @@ import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import toast, { Toaster } from 'react-hot-toast'; // Importation de la bibliothèque de notifications toast
+import * as Yup from 'yup';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -10,8 +12,16 @@ interface LoginModalProps {
   onNavigate?: (page: "dashboard" | "settings" | "devices" | "device-details" | "analytics" | "users" | "reports" | "applications") => void;
 }
 
-export function LoginModal({ 
-  onLoginSuccess, 
+const loginSchema = Yup.object().shape({
+  username: Yup.string()
+    .required('Nom d\'utilisateur requis')
+    .min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères')
+    .matches(/^[a-zA-Z0-9_]+$/, 'Le nom d\'utilisateur ne peut contenir que des lettres, des chiffres et des underscores'),
+  password: Yup.string().required('Mot de passe requis'),
+});
+
+export function LoginModal({
+  onLoginSuccess,
   onNavigate,
 }: LoginModalProps) {
   const navigate = useNavigate();
@@ -20,68 +30,56 @@ export function LoginModal({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async () => {
-    setError('');
-    setIsLoading(true);  // Définir le chargement avant la tentative de connexion
-    
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true);
+    setError(null);
+
     try {
-      console.log('🔍 Tentative de connexion avec:', username);
-      
-      // Ajout d'un debugger pour forcer l'arrêt
-      
-      const result = await signIn(username, password);
-      
-      // Log détaillé du résultat
-      console.log('🎉 Résultat de connexion complet:', result);
-      console.log('🔑 Token:', result?.access_token);
-      console.log('👤 Utilisateur:', result?.user);
-      
-      // Validation explicite du résultat de connexion
-      if (!result || !result.access_token || !result.user) {
-        // Si le résultat est incomplet, traiter comme une erreur de connexion
-        throw new Error('Connexion invalide : informations manquantes');
+      // Validation du nom d'utilisateur en premier
+      if (!username) {
+        setError('Nom d\'utilisateur requis');
+        toast.error('Nom d\'utilisateur requis');
+        return;
       }
-      
-      const { access_token, user } = result;
 
-      
-      // Validation supplémentaire du token et de l'utilisateur
-      if (!access_token) {
-        throw new Error('Token d\'accès manquant');
+      // Validation du mot de passe ensuite
+      if (!password) {
+        setError('Mot de passe requis');
+        toast.error('Mot de passe requis');
+        return;
       }
-      
-      if (!user || !user.role) {
-        throw new Error('Informations utilisateur incomplètes');
-      }
-      
-      // Réinitialiser le chargement en cas de succès
-      setIsLoading(false);
-      onLoginSuccess();
-      
-      // Navigation basée sur le rôle
-      if (user.role === 'admin') {
-        onNavigate ? onNavigate('dashboard') : navigate('/admin-dashboard');
+
+      // Validation complète avec Yup
+      await loginSchema.validate({ username, password });
+
+      const result = await signIn(username, password);
+
+      if (result.success) {
+        let path = "/dashboard";
+        if (result.user.role === 'admin') {
+          path = '/dashboard';
+        }
+
+        toast.success(`Bienvenue, ${result.user.username}!`);
+        onLoginSuccess();
+        navigate(path);
       } else {
-        onNavigate ? onNavigate('dashboard') : navigate('/dashboard');
+        setError(result.error || 'Erreur de connexion');
+        toast.error(result.error || 'La connexion a échoué');
       }
-    } catch (err: any) {
-      console.error('Détails complets de l\'erreur:', err);
-      
-      // Gestion détaillée des messages d'erreur
-      const errorMessage = 
-        err.message === 'Connexion invalide : informations manquantes' 
-        ? 'Échec de l\'authentification' 
-        : (err.message || 'Identifiants incorrects');
-      
-      setError(errorMessage);
-      
-      // Réinitialiser le chargement en cas d'erreur
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        setError(err.message);
+        toast.error(err.message);
+      } else {
+        setError('Erreur de connexion');
+        toast.error('Erreur de connexion');
+      }
+    } finally {
       setIsLoading(false);
-      
-      // Log supplémentaire pour le débogage
-      console.warn('Erreur de connexion:', errorMessage);
     }
   };
 
@@ -105,65 +103,68 @@ export function LoginModal({
             </div>
           )}
 
-          <div className="space-y-4">
-            <div className="relative">
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom d'utilisateur
-              </label>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Entrez votre nom d'utilisateur"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                  Nom d'utilisateur
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Entrez votre nom d'utilisateur"
+                    className="text-gray-700 w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="relative">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Mot de passe
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Entrez votre mot de passe"
+                    className="text-gray-700 w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="relative">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Mot de passe
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Entrez votre mot de passe"
-                  className="text-gray-700 w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
+            <div className="mt-6">
+              <Button
+                type="submit"
+                className="w-full"
+                variant="gradient"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Connexion en cours...' : 'Se connecter'}
+              </Button>
+              <Toaster position="top-right" />
             </div>
-          </div>
 
-          <div className="mt-6">
-            <Button 
-              onClick={handleLogin} 
-              className="w-full"
-              variant="gradient"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Connexion en cours...' : 'Se connecter'}
-            </Button>
-          </div>
-
-          <div className="mt-4 text-center">
-            <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
-              Mot de passe oublié ?
-            </a>
-          </div>
+            <div className="mt-4 text-center">
+              <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
+                Mot de passe oublié ?
+              </a>
+            </div>
+          </form>
         </div>
       </div>
     </div>
