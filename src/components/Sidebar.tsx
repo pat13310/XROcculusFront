@@ -12,6 +12,7 @@ import {
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from '../contexts/TranslationContext';
 import { createLogger } from '../utils/logger';
+import { UserProfileSidebar } from './UserProfileSidebar';
 
 const logger = createLogger('Sidebar');
 
@@ -75,7 +76,7 @@ export function Sidebar({
   return (
     <aside 
       className={`
-        fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg 
+        fixed inset-y-0 left-0 z-30 w-72 bg-white shadow-lg 
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:relative lg:translate-x-0
@@ -92,33 +93,34 @@ export function Sidebar({
           </button>
         </div>
         
-        <nav className="flex-1 py-4 overflow-y-auto">
-          <ul className="space-y-1 px-2">
+        <div className="flex-1 overflow-y-auto">
+          {/* Profil utilisateur en haut de la sidebar */}
+          <UserProfileSidebar />
+
+          <nav className="space-y-1 px-2 py-4">
             {menuItems.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  className={({ isActive }) => `
-                    flex items-center p-2 rounded-lg 
-                    ${isActive 
-                      ? 'bg-violet-100 text-violet-800' 
-                      : 'text-gray-600 hover:bg-gray-100'}
-                    transition-colors duration-200
-                  `}
-                  onClick={onClose}
-                >
-                  <item.icon className="w-5 h-5 mr-3" />
-                  <span className="flex-1">{item.label}</span>
-                  {item.count !== undefined && (
-                    <span className="bg-violet-500 text-white text-xs px-2 py-1 rounded-full">
-                      {item.count}
-                    </span>
-                  )}
-                </NavLink>
-              </li>
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                    isActive
+                      ? 'bg-violet-100 text-violet-900'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`
+                }
+              >
+                {item.icon && <item.icon className="mr-3 h-5 w-5" />}
+                {item.label}
+                {item.count !== undefined && (
+                  <span className="ml-2 bg-violet-500 text-white text-xs px-2 py-1 rounded-full">
+                    {item.count}
+                  </span>
+                )}
+              </NavLink>
             ))}
-          </ul>
-        </nav>
+          </nav>
+        </div>
       </div>
     </aside>
   );
