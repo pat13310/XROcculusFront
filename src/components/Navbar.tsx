@@ -139,7 +139,7 @@ export function Navbar({
 
   const handleSignOut = () => {
     signOut(); // Déconnexion
-    
+
     // Forcer la navigation vers la page d'accueil
     window.location.href = '/'; // Rechargement complet de la page
   };
@@ -149,81 +149,65 @@ export function Navbar({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo et bouton sidebar */}
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={onToggleSidebar} 
-              className="text-gray-400 hover:text-gray-200 focus:outline-none"
+          <div className="flex items-center space-x-2 xs:space-x-1">
+            <button
+              onClick={onToggleSidebar}
+              className="block xl:hidden text-gray-400 hover:text-gray-200 focus:outline-none xs:mr-1"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-6 w-6 xs:h-4 xs:w-4" />
             </button>
-            
-            <div className="flex items-center space-x-2">
-              <div className="p-1.5 bg-violet-800/30 rounded-lg">
-                <Glasses className="h-5 w-5 text-violet-400" />
-              </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
+
+            <div className="flex items-center space-x-2 xs:space-x-1">
+              <Glasses className="h-5 w-5 xs:h-4 xs:w-4 text-violet-400" />
+              <span className="text-lg xs:text-xs md:text-lg font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
                 Gestionnaire VR
               </span>
             </div>
           </div>
 
           {/* Navigation et actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 xs:space-x-2">
             {/* Notifications */}
-            <button 
+            <button
               ref={buttonRef}
-              onClick={() => setShowAlerts(!showAlerts)} 
-              className="relative text-gray-400 hover:text-gray-200"
+              onClick={() => setShowAlerts(!showAlerts)}
+              className="relative text-gray-400 hover:text-gray-200 xs:scale-75"
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-5 w-5 xs:h-4 xs:w-4" />
               {alerts.filter(alert => !alert.read).length > 0 && (
-                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 xs:h-1.5 xs:w-1.5"></span>
               )}
             </button>
 
             {/* Boutons de navigation */}
-            <div className="hidden md:flex space-x-2">
+            <div className="flex space-x-2 xs:space-x-1">
               {isAuthenticated ? (
                 <>
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => handleCustomNavigation('dashboard')}
-                    className="text-gray-400 hover:text-gray-200"
-                  >
-                    Tableau de bord
-                  </Button>
-                  <Button 
-                    variant="ghost" 
+                  
+                  <Button
+                    variant="ghost"
                     onClick={() => handleCustomNavigation('settings')}
-                    className="text-gray-400 hover:text-gray-200"
+                    className="text-gray-400 hover:text-gray-200 xs:text-xs xs:px-2 xs:py-1 md:text-sm md:px-4 md:py-2"
                   >
-                    <Settings className="h-4 w-4 mr-1" />
-                    {t('navbar.settings', 'Paramètres')}
+                    <Settings className="h-4 w-4 xs:h-3 xs:w-3 mr-1" />
                   </Button>
-                  <Button 
-                    variant="gradient" 
+                  <Button
+                    variant="gradient"
                     onClick={handleSignOut}
-                    className="text-gray-400 hover:text-gray-200"
+                    className="text-gray-400 hover:text-gray-200 xs:text-xs xs:px-2 xs:py-1 md:text-sm md:px-4 md:py-2"
                   >
-                    <FiLogOut className="h-4 w-4 mr-1" />
+                    <FiLogOut className="h-4 w-4 xs:h-3 xs:w-3 mr-1" />
                     {t('navbar.logout', 'Déconnexion')}
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => navigate('/')}
-                    className="text-gray-400 hover:text-gray-200"
-                  >
-                    Accueil
-                  </Button>
-                  <Button 
-                    variant="gradient" 
+                  <Button
+                    variant="gradient"
                     onClick={() => setShowLoginModal(true)}
-                    className="text-gray-400 hover:text-gray-200"
+                    className="xs:text-xs xs:px-2 xs:py-0 md:text-sm md:px-4 md:py-2 text-gray-400 hover:text-gray-200"
                   >
-                    <LogIn className="h-4 w-4 mr-1" />
+                    <LogIn className="xs:h-2 xs:w-2 h-4 w-4 mr-1" />
                     {t('navbar.login', 'Connexion')}
                   </Button>
                 </>
@@ -235,8 +219,8 @@ export function Navbar({
 
       {/* Menu des alertes */}
       {showAlerts && (
-        <div 
-          ref={alertsRef} 
+        <div
+          ref={alertsRef}
           className="absolute right-0 mt-2 mr-4 w-80 bg-gray-800 rounded-lg shadow-lg z-50"
         >
           {/* Contenu des alertes */}
@@ -250,13 +234,12 @@ export function Navbar({
               </p>
             ) : (
               alerts.map((alert) => (
-                <div 
-                  key={alert.id} 
-                  className={`p-2 mb-2 rounded ${
-                    alert.type === 'warning' ? 'bg-yellow-900/30 text-yellow-400' :
-                    alert.type === 'error' ? 'bg-red-900/30 text-red-400' :
-                    'bg-blue-900/30 text-blue-400'
-                  } text-xs`}
+                <div
+                  key={alert.id}
+                  className={`p-2 mb-2 rounded ${alert.type === 'warning' ? 'bg-yellow-900/30 text-yellow-400' :
+                      alert.type === 'error' ? 'bg-red-900/30 text-red-400' :
+                        'bg-blue-900/30 text-blue-400'
+                    } text-xs`}
                 >
                   <div className="font-semibold">{alert.title}</div>
                   <div>{alert.message}</div>
@@ -267,12 +250,12 @@ export function Navbar({
         </div>
       )}
       {showLoginModal && (
-        <LoginModal 
-          onClose={() => setShowLoginModal(false)} 
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
           onLoginSuccess={() => {
             setShowLoginModal(false);
             onNavigate('dashboard');
-          }} 
+          }}
           onNavigate={onNavigate}
         />
       )}

@@ -11,7 +11,6 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ 
-  onClose, 
   onLoginSuccess, 
   onNavigate,
 }: LoginModalProps) {
@@ -23,29 +22,66 @@ export function LoginModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = async (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-    }
-    setIsLoading(true);
+  const handleLogin = async () => {
     setError('');
+    setIsLoading(true);  // Définir le chargement avant la tentative de connexion
+    
     try {
-      console.log('Tentative de connexion avec:', username);
-      await signIn(username, password);
-      console.log('Connexion réussie');
+      console.log('🔍 Tentative de connexion avec:', username);
+      
+      // Ajout d'un debugger pour forcer l'arrêt
+      
+      const result = await signIn(username, password);
+      
+      // Log détaillé du résultat
+      console.log('🎉 Résultat de connexion complet:', result);
+      console.log('🔑 Token:', result?.access_token);
+      console.log('👤 Utilisateur:', result?.user);
+      
+      // Validation explicite du résultat de connexion
+      if (!result || !result.access_token || !result.user) {
+        // Si le résultat est incomplet, traiter comme une erreur de connexion
+        throw new Error('Connexion invalide : informations manquantes');
+      }
+      
+      const { access_token, user } = result;
+
+      
+      // Validation supplémentaire du token et de l'utilisateur
+      if (!access_token) {
+        throw new Error('Token d\'accès manquant');
+      }
+      
+      if (!user || !user.role) {
+        throw new Error('Informations utilisateur incomplètes');
+      }
+      
+      // Réinitialiser le chargement en cas de succès
+      setIsLoading(false);
       onLoginSuccess();
-      onNavigate ? onNavigate('dashboard') : navigate('/dashboard');
-      onClose();
+      
+      // Navigation basée sur le rôle
+      if (user.role === 'admin') {
+        onNavigate ? onNavigate('dashboard') : navigate('/admin-dashboard');
+      } else {
+        onNavigate ? onNavigate('dashboard') : navigate('/dashboard');
+      }
     } catch (err: any) {
       console.error('Détails complets de l\'erreur:', err);
-      const errorMessage = err.response?.data?.detail || 
-                           err.message || 
-                           'Identifiants incorrects';
-      setError(errorMessage);      
-      console.error('Echec de connexion:', errorMessage);
+      
+      // Gestion détaillée des messages d'erreur
+      const errorMessage = 
+        err.message === 'Connexion invalide : informations manquantes' 
+        ? 'Échec de l\'authentification' 
+        : (err.message || 'Identifiants incorrects');
+      
+      setError(errorMessage);
+      
+      // Réinitialiser le chargement en cas d'erreur
       setIsLoading(false);
-      //navigate('/');
-      // Ne pas naviguer en cas d'échec de connexion
+      
+      // Log supplémentaire pour le débogage
+      console.warn('Erreur de connexion:', errorMessage);
     }
   };
 
@@ -63,9 +99,9 @@ export function LoginModal({
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-lg mb-4 flex items-center">
-              <Lock className="h-5 w-5 mr-2 text-red-500" />
-              <span>{error}</span>
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+              <strong className="font-bold">Erreur : </strong>
+              <span className="block sm:inline">{error}</span>
             </div>
           )}
 
@@ -99,7 +135,7 @@ export function LoginModal({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Entrez votre mot de passe"
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="text-gray-700 w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
                 <button
                   type="button"

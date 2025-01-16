@@ -15,7 +15,7 @@ type AuthResult = {
   isLoading: boolean;
   error: Error | null;
   signOut: () => void;
-  signIn: (username: string, password: string) => Promise<void>;
+  signIn: (username: string, password: string) => Promise<{ access_token: string, user: any }>;
 };
 
 export function useAuth(): AuthResult {
@@ -38,7 +38,7 @@ export function useAuth(): AuthResult {
         const decodedToken: JwtPayload = jwtDecode(token);
         const currentTime = Math.floor(Date.now() / 1000);
 
-        if (decodedToken.exp < currentTime) {
+        if (decodedToken.exp && decodedToken.exp < currentTime) {
           removeToken();
           setIsAuthenticated(false);
           navigate('/login');
@@ -62,8 +62,15 @@ export function useAuth(): AuthResult {
   const signIn = async (username: string, password: string) => {
     try {
       // Validation basique des entrées
-      if (!username || !password) {
-        throw new Error('Nom d\'utilisateur et mot de passe requis');
+      if (!username && !password) {
+        throw new Error('Nom d\'utilisateur requis et mot de passe requis');
+      }
+      if (!username) {
+        throw new Error('Nom d\'utilisateur requis');
+      }
+
+      if (!password) {
+        throw new Error('Mot de passe requis');
       }
 
       const formData = new FormData();
@@ -83,7 +90,7 @@ export function useAuth(): AuthResult {
         throw new Error('Jeton d\'accès invalide');
       }
 
-      const { access_token } = response.data;
+      const { access_token, user } = response.data;
       
       // Validation du token
       const decodedToken = jwtDecode<JwtPayload>(access_token);
@@ -100,7 +107,7 @@ export function useAuth(): AuthResult {
       // Réinitialiser l'erreur en cas de connexion réussie
       setError(null);
 
-      return response.data;
+      return { access_token, user };
     } catch (error: any) {
       // Gestion détaillée des erreurs
       let errorMessage = 'Échec de connexion';
