@@ -1,4 +1,5 @@
 import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Glasses } from 'lucide-react';
 import { DeviceHeader } from '../components/device-details/DeviceHeader';
 import { DeviceStats } from '../components/device-details/DeviceStats';
@@ -9,17 +10,18 @@ import { LoadingScreen } from '../components/LoadingScreen';
 import { ErrorScreen } from '../components/ErrorScreen';
 import GradientHeader from '../components/GradientHeader';
 
-interface DeviceDetailsPageProps {
-  deviceId: string;
-  onBack: () => void;
-}
-
-export function DeviceDetailsPage({ deviceId, onBack }: DeviceDetailsPageProps) {
-  const { device, loading, error } = useDevice(deviceId);
+export function DeviceDetailsPage() {
+  const { deviceId } = useParams<{ deviceId: string }>();
+  const navigate = useNavigate();
+  const { device, loading, error } = useDevice(deviceId || '');
 
   if (loading) return <LoadingScreen message="Loading device details..." />;
   if (error) return <ErrorScreen message="Failed to load device details" />;
   if (!device) return <ErrorScreen message="Device not found" />;
+
+  const handleBack = () => {
+    navigate('/devices');
+  };
 
   return (
     <div className="space-y-6">
@@ -30,7 +32,7 @@ export function DeviceDetailsPage({ deviceId, onBack }: DeviceDetailsPageProps) 
         Icon={Glasses}
       />
       <button
-        onClick={onBack}
+        onClick={handleBack}
         className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
       >
         <ChevronLeft className="w-5 h-5 mr-1" />

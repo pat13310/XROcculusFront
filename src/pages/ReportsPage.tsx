@@ -31,7 +31,7 @@ interface SupabaseResponse<T> {
   error: any;
 }
 
-export function Reports() {
+export function ReportsPage() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

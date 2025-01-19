@@ -20,12 +20,14 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   deviceCount: number;
+  onDeviceSelect?: (deviceId: string) => void;
 }
 
 export function Sidebar({
   isOpen,
   onClose,
   deviceCount,
+  onDeviceSelect,
 }: SidebarProps) {
   const { t } = useTranslation();
 
@@ -102,18 +104,32 @@ export function Sidebar({
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={({ isActive }) =>
-                  `group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                    isActive
-                      ? 'bg-violet-100 text-violet-900'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`
-                }
+                className={({ isActive }) => `
+                  group flex items-center px-2 py-2 text-sm font-medium rounded-md
+                  ${isActive 
+                    ? 'bg-indigo-100 text-indigo-900' 
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                `}
+                onClick={(e) => {
+                  if (item.label === t('sidebar.devices', 'Appareils') && onDeviceSelect) {
+                    e.preventDefault(); // Empêche la navigation par défaut
+                    // Vous pouvez implémenter une logique de sélection d'appareil ici
+                    // Par exemple, ouvrir une modal de sélection d'appareil
+                    onDeviceSelect('default-device-id'); // À remplacer par une vraie logique
+                  }
+                }}
               >
-                {item.icon && <item.icon className="mr-3 h-5 w-5" />}
+                <item.icon 
+                  className={`
+                    mr-3 h-5 w-5 
+                    ${item.label === t('sidebar.devices', 'Appareils') 
+                      ? 'text-indigo-500 group-hover:text-indigo-600' 
+                      : 'text-gray-400 group-hover:text-gray-500'}
+                  `} 
+                />
                 {item.label}
                 {item.count !== undefined && (
-                  <span className="ml-2 bg-violet-500 text-white text-xs px-2 py-1 rounded-full">
+                  <span className="ml-auto bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs">
                     {item.count}
                   </span>
                 )}

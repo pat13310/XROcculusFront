@@ -9,7 +9,7 @@ import { useTranslation } from '../contexts/TranslationContext';
 import GradientHeader from '../components/GradientHeader';
 import { Users2 } from 'lucide-react';
 
-export function Users() {
+export function UsersPage() {
   const { users, stats, loading, refreshUsers } = useUsers();
   const [showAddModal, setShowAddModal] = useState(false);
   const { t } = useTranslation();

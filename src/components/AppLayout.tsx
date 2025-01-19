@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Dashboard } from '../pages/Dashboard';
-import { Settings } from '../pages/SettingsPage';
-import { Applications } from '../pages/ApplicationsPage';
-import { Users } from '../pages/UsersPage';
-import { Analytics } from '../pages/AnalyticsPage';
-import { Reports } from '../pages/ReportsPage';
+import { DashboardPage } from '../pages/DashboardPage';
+import { SettingsPage } from '../pages/SettingsPage';
+import { ApplicationsPage } from '../pages/ApplicationsPage';
+import { UsersPage } from '../pages/UsersPage';
+import { AnalyticsPage } from '../pages/AnalyticsPage';
+import { ReportsPage } from '../pages/ReportsPage';
 import { DeviceList } from './DeviceList';
 import { DeviceDetailsPage } from '../pages/DeviceDetailsPage';
 import { useDevices } from '../hooks/useDevices';
@@ -42,7 +42,7 @@ export function AppLayout() {
   return (
     <Layout onNavigate={handleNavigate} currentPage={currentPage} deviceCount={stats.totalDevices}>
       {currentPage === 'dashboard' && (
-        <Dashboard 
+        <DashboardPage 
           stats={stats}
           devices={devices}
           devicesLoading={devicesLoading}
@@ -57,11 +57,11 @@ export function AppLayout() {
           onUninstallDevice={handleDeviceUninstall}
         />
       )}
-      {currentPage === 'settings' && <Settings />}
-      {currentPage === 'applications' && <Applications />}
-      {currentPage === 'users' && <Users />}
-      {currentPage === 'analytics' && <Analytics />}
-      {currentPage === 'reports' && <Reports />}
+      {currentPage === 'settings' && <SettingsPage />}
+      {currentPage === 'applications' && <ApplicationsPage />}
+      {currentPage === 'users' && <UsersPage />}
+      {currentPage === 'analytics' && <AnalyticsPage />}
+      {currentPage === 'reports' && <ReportsPage />}
       {currentPage === 'device-details' && selectedDevice && (
         <DeviceDetailsPage 
           deviceId={selectedDevice}

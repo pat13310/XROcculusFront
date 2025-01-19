@@ -1,16 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../config/axios';
 import jwtDecode from 'jwt-decode';
 import * as Yup from 'yup';
 
-// Schéma de validation pour le username et le mot de passe
+// Schéma de validation pour l'email et le mot de passe
 const loginSchema = Yup.object().shape({
-  username: Yup.string()
-    .required('Le nom d\'utilisateur est obligatoire')
-    .min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères')
-    .max(50, 'Le nom d\'utilisateur est trop long')
-    .matches(/^[a-zA-Z0-9_]+$/, 'Le nom d\'utilisateur ne peut contenir que des lettres, des chiffres et des underscores'),
+  email: Yup.string()
+    .required('L\'email est obligatoire')
+    .email('L\'email doit être valide')
+    .max(50, 'L\'email est trop long'),
   password: Yup.string()
     .required('Le mot de passe est obligatoire')
     .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
@@ -36,6 +35,16 @@ export function useAuth() {
     isLoading: true
   });
 
+  // Effet pour gérer la navigation après authentification
+  // Supprimé car il causait une redirection systématique vers le dashboard
+  // useEffect(() => {
+  //   if (state.isAuthenticated && state.user) {
+  //     const path = state.user.role === 'admin' ? '/dashboard' : '/dashboard';
+  //     console.log('Navigation automatique vers:', path);
+  //     navigate(path);
+  //   }
+  // }, [state.isAuthenticated, state.user, navigate]);
+
   const getToken = () => localStorage.getItem('token');
   const setToken = (token: string) => localStorage.setItem('token', token);
   const removeToken = () => localStorage.removeItem('token');
@@ -51,79 +60,99 @@ export function useAuth() {
 
   const signIn = async (username: string, password: string) => {
     try {
-      // Validation initiale des entrées
-      if (!username || !password) {
-        setState({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false
-        });
-        return { 
-          success: false, 
-          error: 'Nom d\'utilisateur ou mot de passe manquant' 
-        };
-      }
-
-      setState({ ...state, isLoading: true });
+      console.log('Tentative de connexion avec:', username);
 
       const response = await axios.post(`${baseUrl}/auth/login`, 
-        `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+        {
+          email: username,
+          password: password
+        },
+        { 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          withCredentials: true,
+        }
       );
-
+      
+      console.log('Réponse de connexion complète:', response);
+      console.log('Statut de la réponse:', response.status);
+      console.log('Données de la réponse:', response.data);
+      
       const { access_token: token, user } = response.data;
       
+      console.log('Token reçu:', !!token);
+      console.log('Informations utilisateur:', user);
+
       // Validation du token et de l'utilisateur
       if (!token || !user) {
+        console.error('Token ou utilisateur manquant');
         setState({
           user: null,
           isAuthenticated: false,
-          isLoading: false
+          isLoading: false,
         });
-        return { 
-          success: false, 
-          error: 'Authentification échouée' 
+        return {
+          success: false,
+          error: 'Impossible de récupérer les informations utilisateur'
         };
       }
-
-      // Log de sécurité pour la tentative de connexion
-      console.log(`Connexion réussie pour l'utilisateur: ${username} à ${new Date().toISOString()}`);
 
       // Stocker le token
       setToken(token);
 
-      // Mettre à jour l'état avec les informations de l'utilisateur
+      // Stocker les informations utilisateur dans le localStorage
+      localStorage.setItem('userInfo', JSON.stringify(user));
+      localStorage.setItem('authToken', token);
+
+      // Mettre à jour l'état de l'authentification
       setState({
         user: user,
         isAuthenticated: true,
-        isLoading: false
+        isLoading: false,
       });
 
-      return { 
-        success: true, 
-        user: user, 
-        token: token,
-        role: user.role // Ajouter le rôle pour une navigation conditionnelle
+      console.log('État après connexion:', {
+        isAuthenticated: true,
+        user: user
+      });
+
+      return {
+        success: true,
+        user: user
       };
-    } catch (error: any) {
-      // Gestion des erreurs détaillée
-      console.error('Erreur de connexion:', error);
+    } catch (axiosError: unknown) {
+      console.error('Erreur de connexion complète:', axiosError);
       
+      // Type guard pour vérifier si c'est une erreur Axios
+      if (axios.isAxiosError(axiosError)) {
+        console.error('Erreur Axios détaillée:', axiosError);
+        
+        // Gestion spécifique des erreurs Axios
+        if (axiosError.response) {
+          console.error('Données de l\'erreur:', axiosError.response.data);
+          console.error('Statut de l\'erreur:', axiosError.response.status);
+          console.error('En-têtes de l\'erreur:', axiosError.response.headers);
+        }
+      }
+
       setState({
         user: null,
         isAuthenticated: false,
-        isLoading: false
+        isLoading: false,
       });
 
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Impossible de se connecter'
+      return {
+        success: false,
+        error: axiosError instanceof Error ? axiosError.message : 'Erreur de connexion'
       };
     }
   };
 
   const signOut = useCallback(() => {
     removeToken();
+    localStorage.removeItem('userInfo');
     setState({
       user: null,
       isAuthenticated: false,
@@ -136,36 +165,40 @@ export function useAuth() {
     const token = getToken();
 
     if (token && isTokenValid(token)) {
-      const fetchProfile = async () => {
+      // Récupérer les informations utilisateur depuis le localStorage
+      const userInfoString = localStorage.getItem('userInfo');
+      
+      if (userInfoString) {
         try {
-          const { data } = await axios.get(`${baseUrl}/users/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
+          const userData = JSON.parse(userInfoString);
           setState({
-            user: data,
+            user: userData,
             isAuthenticated: true,
             isLoading: false
           });
-        } catch {
-          removeToken();
+        } catch (error) {
+          console.error('Erreur lors du parsing des informations utilisateur:', error);
           setState({
             user: null,
             isAuthenticated: false,
             isLoading: false
           });
         }
-      };
-
-      fetchProfile();
+      } else {
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false
+        });
+      }
     } else {
-      setState(prev => ({
-        ...prev,
+      setState({
+        user: null,
         isAuthenticated: false,
         isLoading: false
-      }));
+      });
     }
-  }, [baseUrl, isTokenValid, getToken()]);
+  }, [navigate]);
 
   return {
     ...state,

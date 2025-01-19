@@ -73,7 +73,7 @@ export async function checkSupabaseConnection() {
     return true;
   } catch (error) {
     console.error('🚫 Échec de la connexion Supabase:', error);
-    logger.error('Échec de la connexion Supabase:', error);
+    logger.error('Échec de la connexion Supabase:', { error: error instanceof Error ? error.message : String(error) });
     return false;
   }
 }

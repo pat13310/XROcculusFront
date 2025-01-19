@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, X } from 'lucide-react';
 import { Button } from './ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -16,11 +16,12 @@ const loginSchema = Yup.object().shape({
   username: Yup.string()
     .required('Nom d\'utilisateur requis')
     .min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères')
-    .matches(/^[a-zA-Z0-9_]+$/, 'Le nom d\'utilisateur ne peut contenir que des lettres, des chiffres et des underscores'),
+    .matches(/^[a-zA-Z0-9_@.]+$/, 'Le nom d\'utilisateur ne peut contenir que des lettres, des chiffres et des underscores'),
   password: Yup.string().required('Mot de passe requis'),
 });
 
 export function LoginModal({
+  onClose,
   onLoginSuccess,
   onNavigate,
 }: LoginModalProps) {
@@ -58,14 +59,9 @@ export function LoginModal({
       const result = await signIn(username, password);
 
       if (result.success) {
-        let path = "/dashboard";
-        if (result.user.role === 'admin') {
-          path = '/dashboard';
-        }
-
         toast.success(`Bienvenue, ${result.user.username}!`);
         onLoginSuccess();
-        navigate(path);
+        
       } else {
         setError(result.error || 'Erreur de connexion');
         toast.error(result.error || 'La connexion a échoué');
@@ -90,7 +86,13 @@ export function LoginModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
-        <div className="p-8">
+        <div className="p-8 relative">
+          <button 
+            onClick={onClose}
+            className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-gray-900">Connexion</h2>
             <p className="text-gray-600 mt-2">Accédez à votre tableau de bord</p>

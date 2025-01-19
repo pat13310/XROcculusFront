@@ -7,7 +7,7 @@ import { LoadingScreen } from '../components/LoadingScreen';
 import { useTranslation } from '../contexts/TranslationContext';
 import GradientHeader from '../components/GradientHeader';
 
-export function Applications() {
+export function ApplicationsPage() {
   const { apps, loading } = useApps();
   const [filter, setFilter] = useState<'all' | 'installed' | 'available'>('all');
   const [searchQuery, setSearchQuery] = useState('');

@@ -1,3 +1,5 @@
+import React from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Monitor, Battery, HardDrive, Activity, Gauge } from 'lucide-react';
 import { DeviceList } from '../components/DeviceList';
@@ -8,7 +10,7 @@ import { formatBytes } from '../utils/formatters';
 import type { Device, DeviceStats } from '../types';
 import GradientHeader from '../components/GradientHeader';
 
-export interface DashboardProps {
+interface DashboardPageContextProps {
   stats: DeviceStats;
   devices: Device[];
   devicesLoading: boolean;
@@ -16,14 +18,15 @@ export interface DashboardProps {
   onUninstallDevice?: (id: string) => void;
 }
 
-export function Dashboard({
-  stats,
-  devices,
-  devicesLoading,
-  onSelectDevice,
-  onUninstallDevice
-}: DashboardProps) {
+export function DashboardPage() {
   const { t } = useTranslation();
+  const { 
+    stats, 
+    devices, 
+    devicesLoading, 
+    onSelectDevice, 
+    onUninstallDevice 
+  } = useOutletContext<DashboardPageContextProps>();
 
   // Calcul des statistiques en toute sécurité
   const avgBattery = stats.batteryLevels.length > 0

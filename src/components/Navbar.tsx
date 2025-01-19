@@ -32,10 +32,11 @@ interface Alert {
 export function Navbar({
   onToggleSidebar,
   onNavigate,
+  currentPage,
   isAuthenticated,
   onLogin,
   onSignOut
-}: Omit<NavbarProps, 'currentPage'>) {
+}: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -257,7 +258,6 @@ export function Navbar({
             setShowLoginModal(false);
             onNavigate('dashboard');
           }}
-          onNavigate={onNavigate}
         />
       )}
     </nav>

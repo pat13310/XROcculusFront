@@ -8,14 +8,15 @@ import type { Page } from '../hooks/useNavigation';
 
 const logger = createLogger('Layout');
 
-interface LayoutProps {
+export interface LayoutProps {
   children: React.ReactNode;
   deviceCount: number;
   onNavigate?: (page: Page) => void;
   currentPage?: Page;
+  onDeviceSelect?: (deviceId: string) => void;
 }
 
-export function Layout({ children, deviceCount, onNavigate, currentPage }: LayoutProps) {
+export function Layout({ children, deviceCount, onNavigate, currentPage, onDeviceSelect }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isAuthenticated, signOut } = useAuth();
 
@@ -26,6 +27,7 @@ export function Layout({ children, deviceCount, onNavigate, currentPage }: Layou
         isAuthenticated={isAuthenticated}
         onSignOut={signOut}
         onNavigate={onNavigate}
+        currentPage={currentPage}
       />
       
       <div className="flex-1 flex">
@@ -33,6 +35,7 @@ export function Layout({ children, deviceCount, onNavigate, currentPage }: Layou
           isOpen={sidebarOpen} 
           onClose={() => setSidebarOpen(false)} 
           deviceCount={deviceCount}
+          onDeviceSelect={onDeviceSelect}
         />
         
         <main className="flex-1 p-6 overflow-y-auto">

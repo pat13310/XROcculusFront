@@ -7,7 +7,7 @@ import { useSettings } from '../hooks/useSettings';
 import { useTranslation } from '../contexts/TranslationContext';
 import type { SettingsSection } from '../types/settings';
 
-export function Settings() {
+export function SettingsPage() {
   const { settings, updateSettings } = useSettings();
   const [activeSection, setActiveSection] = useState<SettingsSection>('appearance');
   const { t } = useTranslation();
