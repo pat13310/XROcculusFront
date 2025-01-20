@@ -192,7 +192,7 @@ export function Navbar({
                     }}
                     className="text-gray-400 hover:text-gray-300 dark:text-gray-200 dark:hover:text-gray-200"
                   >
-                    <Settings className="h-6 w-6" />
+                    <Settings className="h-5 w-5 mr-4" />
                   </button>
                   <Button
                     variant="gradient"

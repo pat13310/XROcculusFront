@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1440" height="1024" viewBox="0 0 1440 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g opacity="0.3">
+        <!-- Motif de fond -->
+        <path d="M0 0h1440v1024H0z" fill="url(#gradient)" />
+        
+        <!-- Cercles décoratifs -->
+        <circle cx="720" cy="512" r="400" stroke="url(#circle1)" stroke-width="2" />
+        <circle cx="720" cy="512" r="300" stroke="url(#circle2)" stroke-width="2" />
+        <circle cx="720" cy="512" r="200" stroke="url(#circle3)" stroke-width="2" />
+        
+        <!-- Lignes géométriques -->
+        <path d="M0 204.8L1440 819.2" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+        <path d="M0 819.2L1440 204.8" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+    </g>
+    
+    <!-- Définition des dégradés -->
+    <defs>
+        <linearGradient id="gradient" x1="0" y1="0" x2="1440" y2="1024" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#4F46E5" />
+            <stop offset="100%" stop-color="#7C3AED" />
+        </linearGradient>
+        
+        <linearGradient id="circle1" x1="320" y1="112" x2="1120" y2="912" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.2)" />
+            <stop offset="100%" stop-color="rgba(255,255,255,0.05)" />
+        </linearGradient>
+        
+        <linearGradient id="circle2" x1="420" y1="212" x2="1020" y2="812" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.15)" />
+            <stop offset="100%" stop-color="rgba(255,255,255,0.05)" />
+        </linearGradient>
+        
+        <linearGradient id="circle3" x1="520" y1="312" x2="920" y2="712" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.1)" />
+            <stop offset="100%" stop-color="rgba(255,255,255,0.05)" />
+        </linearGradient>
+    </defs>
+</svg>

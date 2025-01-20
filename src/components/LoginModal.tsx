@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff, X } from 'lucide-react';
 import { Button } from './ui/Button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import toast, { Toaster } from 'react-hot-toast'; // Importation de la bibliothèque de notifications toast
 import * as Yup from 'yup';
@@ -105,67 +105,56 @@ export function LoginModal({
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
               <div className="relative">
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom d'utilisateur
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Entrez votre nom d'utilisateur"
-                    className="text-gray-700 w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div className="relative">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Mot de passe
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Entrez votre mot de passe"
-                    className="text-gray-700 w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                  <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Nom d'utilisateur"
+                />
               </div>
             </div>
 
-            <div className="mt-6">
-              <Button
-                type="submit"
-                className="w-full"
-                variant="gradient"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Connexion en cours...' : 'Se connecter'}
-              </Button>
-              <Toaster position="top-right" />
+            <div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Mot de passe"
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              <div className="mt-2 text-right">
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                  onClick={onClose}
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
             </div>
 
-            <div className="mt-4 text-center">
-              <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
-                Mot de passe oublié ?
-              </a>
-            </div>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full"
+            >
+              {isLoading ? "Connexion en cours..." : "Se connecter"}
+            </Button>
           </form>
         </div>
       </div>

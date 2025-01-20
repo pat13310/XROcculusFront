@@ -161,6 +161,32 @@ export function useAuth() {
     navigate('/');
   }, [navigate]);
 
+  const forgotPassword = async (email: string) => {
+    let result:any;
+    try {
+        result = await axios.post(`${baseUrl}/auth/forgot-password`, 
+        { email },
+        { 
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        }
+      );
+      
+      return {
+        success: true,
+        message: result.data.message || 'Un email de réinitialisation a été envoyé'
+      };
+    } catch (error: any) {
+      console.error('Erreur lors de la demande de réinitialisation:', error);
+      return {
+        success: false,
+        message: result.details || 'Une erreur est survenue'
+      };
+    }
+  };
+
   useEffect(() => {
     const token = getToken();
 
@@ -203,6 +229,9 @@ export function useAuth() {
   return {
     ...state,
     signIn,
-    signOut
+    signOut,
+    forgotPassword,
+    getToken,
+    isTokenValid
   };
 }

@@ -10,15 +10,16 @@ import { ApplicationsPage } from './pages/ApplicationsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AssistantPage } from './pages/AssistantPage';
-import { DeviceDetailsPage } from './pages/DeviceDetailsPage'; // Added import for DeviceDetailsPage
+import { DeviceDetailsPage } from './pages/DeviceDetailsPage';
 import { useAuth } from './hooks/useAuth';
-import { useDevices } from './hooks/useDevices';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { TranslationProvider } from './contexts/TranslationContext';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function App() {
   const { isAuthenticated, isLoading } = useAuth();
-  const { devices, stats, loading: devicesLoading } = useDevices();
 
   console.log('App Authentication State:', { 
     isAuthenticated, 
@@ -40,25 +41,21 @@ export default function App() {
   }
 
   return (
-    <TranslationProvider>
-      <ErrorBoundary>
+    <ErrorBoundary>
+      <TranslationProvider>
+        <ToastContainer position="top-right" autoClose={5000} />
         {isAuthenticated ? (
           <Routes>
             <Route path="/" element={<AppLayout />}>
               <Route index element={<Navigate to="/dashboard" />} />
               <Route path="dashboard" element={<DashboardPage 
-                stats={stats} 
-                devices={devices} 
-                devicesLoading={devicesLoading}
-                onSelectDevice={handleSelectDevice}
               />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="devices" element={<DevicesPage 
-                onSelectDevice={handleSelectDevice}
-                onUninstallDevice={handleUninstallDevice}
               />} />
               <Route path="users" element={<UsersPage />} />
-              <Route path="applications" element={<ApplicationsPage />} />
+              <Route path="applications" element={<ApplicationsPage 
+              />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="assistant" element={<AssistantPage />} />
@@ -66,9 +63,13 @@ export default function App() {
             </Route>
           </Routes>
         ) : (
-          <LandingPage />
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
         )}
-      </ErrorBoundary>
-    </TranslationProvider>
+      </TranslationProvider>
+    </ErrorBoundary>
   );
 }

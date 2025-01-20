@@ -10,8 +10,44 @@ export default {
       },
       backgroundImage: {
         'gradient-text': 'linear-gradient(to right, #9333ea, #ec4899, #6d28d9)',
-      }
-    }
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0) scale(1)' },
+          '50%': { transform: 'translateY(0px) scale(1)' },
+        },
+        pulse: {
+          '0%, 100%': { opacity: 0.6, transform: 'scale(0.8)' },
+          '50%': { opacity: 0.8, transform: 'scale(1)' },
+        },
+        wave: {
+          '0%': { transform: 'rotate(0deg)' },
+          '10%': { transform: 'rotate(5deg)' },
+          '20%': { transform: 'rotate(0deg)' },
+          '30%': { transform: 'rotate(5deg)' },
+          '40%': { transform: 'rotate(1deg)' },
+          '60%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(0deg)' },
+        },
+        'slide-up': {
+          '0%': { transform: 'translateY(30px)', opacity: 0 },
+          '100%': { transform: 'translateY(0)', opacity: 1 },
+        },
+        'lock-bounce': {
+          '0%, 100%': { transform: 'rotate(-6deg) translateY(0)' },
+          '25%': { transform: 'rotate(6deg) translateY(-10px)' },
+          '50%': { transform: 'rotate(-3deg) translateY(0)' },
+          '75%': { transform: 'rotate(3deg) translateY(-5px)' },
+        },
+      },
+      animation: {
+        float: 'float 5s ease-in-out infinite',
+        pulse: 'pulse 3s ease-in-out infinite',
+        wave: 'wave 1.5s ease-in-out infinite',
+        'slide-up': 'slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'lock-bounce': 'lock-bounce 2s ease-in-out infinite',
+      },
+    },
   },
   plugins: [
     function({ addUtilities }) {
@@ -25,17 +61,11 @@ export default {
         '.text-shadow-lg': {
           'text-shadow': '0 2px 4px rgba(0, 0, 0, 0.3)',
         },
-        '.gradient-text': {
-          'background-image': 'linear-gradient(to right, #9333ea, #ec4899, #6d28d9)',
-          '-webkit-background-clip': 'text',
-          'background-clip': 'text',
-          'color': 'transparent',
-          '-webkit-text-stroke': '1.5px rgba(126, 34, 206, 0.3)',
-          'paint-order': 'stroke fill',
-          '-webkit-text-fill-color': 'transparent'
-        }
-      }
-      addUtilities(newUtilities)
-    }
-  ]
+        '.transform-gpu': {
+          'transform': 'translateZ(0)',
+        },
+      };
+      addUtilities(newUtilities);
+    },
+  ],
 };
