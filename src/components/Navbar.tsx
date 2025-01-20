@@ -185,14 +185,15 @@ export function Navbar({
             <div className="flex space-x-2 xs:space-x-1">
               {isAuthenticated ? (
                 <>
-                  
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleCustomNavigation('settings')}
-                    className="text-gray-400 hover:text-gray-200 xs:text-xs xs:px-2 xs:py-1 md:text-sm md:px-4 md:py-2"
+                  <button 
+                    onClick={() => {
+                      onNavigate('settings');
+                      navigate('/settings');
+                    }}
+                    className="text-gray-400 hover:text-gray-300 dark:text-gray-200 dark:hover:text-gray-200"
                   >
-                    <Settings className="text-gray-400 hover:text-gray-200 h-5 w-5 xs:h-3 xs:w-3 mr-1" />
-                  </Button>
+                    <Settings className="h-6 w-6" />
+                  </button>
                   <Button
                     variant="gradient"
                     onClick={handleSignOut}
