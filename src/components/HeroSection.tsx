@@ -13,18 +13,23 @@ export function HeroSection({ handleOpenLoginModal }: HeroSectionProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="xl:py-24 relative overflow-hidden min-h-[80vh] flex items-center justify-center">
+    <div className="xl:py-12 relative overflow-hidden min-h-[80vh] flex items-center justify-center">
       <div 
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{ 
           backgroundImage: 'url(/images/hero.jpeg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          opacity: 0.85,
-          filter: 'brightness(0.3) grayscale(0.7) hue-rotate(250deg) saturate(150%)'
+          opacity: 0.86,
+          filter: 'blur(1px) brightness(0.3) grayscale(0.7) hue-rotate(250deg) saturate(150%)'
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-pink-500/10 via-purple-500/10 to-indigo-500/20 z-0" />
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 via-purple-600/40 to-indigo-700/50 backdrop-blur-sm z-0" 
+           style={{
+             background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(147, 51, 234, 0.2) 50%, rgba(79, 70, 229, 0.2) 100%)',
+             mixBlendMode: 'overlay'
+           }}
+      />
       <div className="relative z-10 text-center max-w-5xl mx-auto px-4">
         <motion.h1 
           initial={{ scale: 0.9, opacity: 0 }}
@@ -35,11 +40,15 @@ export function HeroSection({ handleOpenLoginModal }: HeroSectionProps) {
             type: "spring",
             stiffness: 120
           }}
-          className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight"
+          className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight p-3"
           style={{ 
-            color: '#ec4899',
-            WebkitTextStroke: '1px rgba(147, 51, 234, 0.5)',
-            textShadow: '0 0 20px rgba(236, 72, 153, 0.3)'
+            background: 'linear-gradient(to right, #ec4899 20%, #8b5cf6 50%, #6366f1 80%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundSize: '200% auto',
+            animation: 'gradient 3s linear infinite',
+            textShadow: '0 0 20px rgba(236, 72, 153, 0.3)',
+            WebkitTextStroke: '2px rgba(147, 51, 234, 0.8)'
           }}
         >
           {t('landing.hero.title', 'Gérez Vos Casques XR')}
