@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Bell, Settings, Glasses, LogIn } from 'lucide-react';
+import { Menu, Bell, Settings, LogIn } from 'lucide-react';
 import { useTranslation } from '../contexts/TranslationContext';
 import { supabase } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
@@ -160,9 +160,13 @@ export function Navbar({
             </button>
 
             <div className="flex items-center space-x-2 xs:space-x-1">
-              <Glasses className="h-5 w-5 xs:h-4 xs:w-4 text-violet-400" />
+              <img
+                src="/images/horus2.svg"
+                alt="Logo"
+                className="h-11 w-11 xs:h-4 xs:w-4"
+              />
               <span className="text-lg xs:text-xs md:text-lg font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
-                Gestionnaire VR
+                Gestionnaire XR
               </span>
             </div>
           </div>
