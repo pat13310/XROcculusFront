@@ -1,14 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { LoginModal } from '../components/LoginModal';
 import { useTranslation } from '../contexts/TranslationContext';
-import { Footer } from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
-import { StatsSection } from '../components/StatsSection';
-import { FeatureSection } from '../components/FeatureSection';
-import { motion } from 'framer-motion';
 import { HeroSection } from '../components/HeroSection';
+import { Footer } from '../components/Footer';
+
+// Lazy loading des composants moins critiques
+const StatsSection = lazy(() => import('../components/StatsSection'));
+const FeatureSection = lazy(() => import('../components/FeatureSection'));
+
+// Composant de chargement
+const LoadingSkeleton = () => (
+  <div className="w-full max-w-7xl mx-auto px-4 py-12">
+    <div className="animate-pulse space-y-8">
+      <div className="h-64 bg-gray-200/20 rounded-xl"></div>
+      <div className="h-32 bg-gray-200/20 rounded-xl"></div>
+    </div>
+  </div>
+);
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -124,41 +135,25 @@ export function LandingPage() {
         onLogin={handleOpenLoginModal}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 text-center">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-24 text-center">
         <div className="relative overflow-hidden">
           {isLoginModalOpen && <LoginModal onClose={handleCloseLoginModal} onLoginSuccess={handleLoginSuccess} />}
           <HeroSection handleOpenLoginModal={handleOpenLoginModal} />
         </div>
 
-        {/* Features Section */}
-        <motion.div
-          initial={{ opacity: 0, x: 100 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ 
-            duration: 0.8, 
-            type: "spring", 
-            stiffness: 50,
-            delay: 0.2
-          }}
-          viewport={{ once: true }}
-        >
-          <FeatureSection />
-        </motion.div>
+        {/* Features Section avec animation CSS native */}
+        <div className="opacity-0 translate-x-full animate-slide-in-right [--delay:200ms]">
+          <Suspense fallback={<LoadingSkeleton />}>
+            <FeatureSection />
+          </Suspense>
+        </div>
 
-        {/* Stats Section */}
-        <motion.div
-          initial={{ opacity: 0, x: -100 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ 
-            duration: 0.8, 
-            type: "spring", 
-            stiffness: 50,
-            delay: 0.2
-          }}
-          viewport={{ once: true }}
-        >
-          <StatsSection />
-        </motion.div>
+        {/* Stats Section avec animation CSS native */}
+        <div className="opacity-0 translate-x-[-100%] animate-slide-in-left [--delay:400ms]">
+          <Suspense fallback={<LoadingSkeleton />}>
+            <StatsSection />
+          </Suspense>
+        </div>
       </main>
       {/* Footer */}
       <Footer />

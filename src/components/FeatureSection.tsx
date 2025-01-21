@@ -1,7 +1,7 @@
 import { Shield, Zap, Users } from 'lucide-react';
 import { useTranslation } from '../contexts/TranslationContext';
 
-export function FeatureSection() {
+export default function FeatureSection() {
   const { t } = useTranslation();
 
   const features = [
@@ -29,10 +29,10 @@ export function FeatureSection() {
     <section id="features" className="bg-white py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
+          <h2 className="text-4xl font-extrabold text-gray-700 mb-4">
             {t('landing.features.title', 'Nos Fonctionnalités Clés')}
           </h2>
-          <p className="max-w-2xl mx-auto text-xl text-gray-600">
+          <p className="max-w-3xl mx-auto text-xl text-gray-500">
             {t('landing.features.subtitle', 'Découvrez comment notre plateforme simplifie la gestion de vos appareils VR')}
           </p>
         </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from '../contexts/TranslationContext';
 import { TrendingUp, Shield, Clock } from 'lucide-react';
 
-export function StatsSection() {
+export default function StatsSection() {
   const { t } = useTranslation();
 
   const stats = [
@@ -33,10 +33,10 @@ export function StatsSection() {
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 py-20 mb-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
+          <h2 className="text-4xl font-extrabold text-gray-700 mb-4">
             {t('landing.stats.title', 'Notre Impact')}
           </h2>
-          <p className="max-w-2xl mx-auto text-xl text-gray-600">
+          <p className="max-w-3xl mx-auto text-xl text-gray-600">
             {t('landing.stats.subtitle', 'Des chiffres qui montrent notre engagement envers la gestion des appareils VR')}
           </p>
         </div>
