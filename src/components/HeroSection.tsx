@@ -66,7 +66,7 @@ export function HeroSection({ handleOpenLoginModal }: HeroSectionProps) {
                     <Button 
                       onClick={handleOpenLoginModal}
                       variant="gradient"
-                      className="h-10 px-3 bg-purple-500 hover:bg-purple-600 text-xs font-medium transition-all duration-200"
+                      className="h-12 px-4   bg-purple-500 hover:bg-purple-600 text-md font-medium transition-all duration-200"
                     >
                       Commencer
                       <ChevronRight className="ml-1.5 w-3 h-3" />
@@ -74,9 +74,9 @@ export function HeroSection({ handleOpenLoginModal }: HeroSectionProps) {
 
                     <a 
                       href="#features" 
-                      className="h-10 px-3 inline-flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-md text-xs font-medium text-white/90 transition-colors duration-200"
+                      className="h-12 px-4 inline-flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-md text-md font-medium text-white/90 transition-colors duration-200"
                     >
-                      En Savoir Plus
+                      En savoir plus
                       <ArrowRight className="ml-1.5 w-3 h-3 opacity-70" />
                     </a>
                   </div>

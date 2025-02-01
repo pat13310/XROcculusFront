@@ -16,3 +16,19 @@ export interface DeviceStats {
   storageTotal: number;
   batteryLevels: number[];
 }
+
+export interface Application {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  status: 'active' | 'pending' | 'revoked' | 'suspended' | 'available' | 'installed';
+  installed: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+  rating?: number;
+  developer?: string;
+  category?: string;
+  version?: string;
+  size?: number;
+}

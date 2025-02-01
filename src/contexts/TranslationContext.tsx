@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation as useReactTranslation } from 'react-i18next';
 import { useSettings } from '../hooks/useSettings';
 
 interface TranslationContextType {
@@ -18,7 +18,7 @@ const TranslationContext = createContext<TranslationContextType>({
 
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
   const { settings, updateSettings } = useSettings();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useReactTranslation();
   const [loading, setLoading] = useState(true);
 
   // Gestion du chargement des traductions
@@ -58,4 +58,4 @@ export function useCustomTranslation() {
   return useContext(TranslationContext);
 }
 
-export { useTranslation };
+export { useCustomTranslation as useTranslation };

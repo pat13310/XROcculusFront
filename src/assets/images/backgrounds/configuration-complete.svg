@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
-  <path d="M200 50c-82.71 0-150 67.29-150 150s67.29 150 150 150 150-67.29 150-150S282.71 50 200 50z" fill="#E6F2FF"/>
-  <path d="M150 180l50-50 50 50" stroke="#4A90E2" stroke-width="15" fill="none" stroke-linecap="round"/>
-  <circle cx="200" cy="200" r="30" fill="#4A90E2"/>
-  <text x="200" y="250" text-anchor="middle" fill="#2C3E50" font-size="20">Configuration Terminée</text>
-</svg>

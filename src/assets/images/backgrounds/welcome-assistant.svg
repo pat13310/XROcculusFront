@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
-  <path d="M200 50c-82.71 0-150 67.29-150 150s67.29 150 150 150 150-67.29 150-150S282.71 50 200 50z" fill="#E6F2FF"/>
-  <path d="M200 230c-16.54 0-30-13.46-30-30s13.46-30 30-30 30 13.46 30 30-13.46 30-30 30z" fill="#4A90E2"/>
-  <path d="M170 170h60v30h-60z" fill="#4A90E2" opacity=".5"/>
-  <text x="200" y="250" text-anchor="middle" fill="#2C3E50" font-size="20">Assistant XR</text>
-</svg>
