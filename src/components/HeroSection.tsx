@@ -1,4 +1,3 @@
-import React from 'react';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import { Button } from './ui/Button';
 import { VRDeviceIllustration } from './VRDeviceIllustration';

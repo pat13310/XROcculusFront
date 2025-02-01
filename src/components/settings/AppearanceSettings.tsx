@@ -19,28 +19,28 @@ export function AppearanceSettings({ settings, onUpdate }: AppearanceSettingsPro
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900">
+        <h3 className="text-md font-medium text-gray-900">
           {t('settings.appearance.theme', 'Thèmes')}
         </h3>
         <div className="mt-4 space-y-4">
           {themes.map(({ value, label }) => (
-            <label key={value} className="flex items-center">
+            <label key={value} className="text-md flex items-center">
               <input
                 type="radio"
                 name="theme"
                 value={value}
                 checked={settings.theme === value}
                 onChange={(e) => onUpdate({ theme: e.target.value as UserSettings['theme'] })}
-                className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                className="h-4 w-4 text-violet-600 border-gray-300 focus:ring-violet-500"
               />
-              <span className="ml-3 text-gray-700">{label}</span>
+              <span className="ml-3 text-sm text-gray-500">{label}</span>
             </label>
           ))}
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-gray-900">
+        <h3 className="text-md font-medium text-gray-900">
           {t('settings.appearance.sidebar', 'Barre latérale')}
         </h3>
         <div className="mt-4">
@@ -49,9 +49,9 @@ export function AppearanceSettings({ settings, onUpdate }: AppearanceSettingsPro
               type="checkbox"
               checked={settings.sidebarCollapsed}
               onChange={(e) => onUpdate({ sidebarCollapsed: e.target.checked })}
-              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="h-4 w-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
             />
-            <span className="ml-3 text-gray-700">
+            <span className="ml-3 text-sm text-gray-500">
               {t('settings.appearance.collapse_sidebar', 'Barre latérale visible par défaut')}
             </span>
           </label>

@@ -23,7 +23,7 @@ export const supabase = createClient<Database>(
     },
     global: {
       headers: {
-        'x-application-name': 'vr-device-manager'
+        'x-application-name': 'XrTest'
       }
     },
     db: {

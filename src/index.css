@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  [type="checkbox"] {
+    color: #9333ea;
+    border-color: #d1d5db;
+    border-radius: 0.25rem;
+  }
+  [type="checkbox"]:focus {
+    --tw-ring-color: #9333ea;
+    --tw-ring-opacity: 0.5;
+  }
+}
+
 @keyframes gradient {
   0% {
     background-position: 0% 50%;

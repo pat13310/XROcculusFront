@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, Bell, Settings, LogIn } from 'lucide-react';
+import { Menu, Bell, Settings, LogIn, CheckCircle, AlertTriangle, AlertCircle, Info } from 'lucide-react';
 import { useTranslation } from '../contexts/TranslationContext';
 import { supabase } from '../lib/supabase';
 import { createLogger } from '../utils/logger';
@@ -125,19 +125,7 @@ export function Navbar({
     }
   };
 
-  const unreadCount = alerts.filter(alert => !alert.read).length;
-
-  // Gestionnaire de navigation personnalisé
-  const handleCustomNavigation = (page: 'dashboard' | 'settings' | 'devices' | 'device-details' | 'analytics' | 'users' | 'reports' | 'applications') => {
-    // Si l'utilisateur est connecté et tente de naviguer alors qu'il est déjà sur la page de landing
-    if (isAuthenticated && location.pathname === '/') {
-      // Rediriger vers le dashboard
-      navigate('/dashboard');
-    } else {
-      // Sinon, utiliser la navigation normale
-      onNavigate(page);
-    }
-  };
+ 
 
   const handleSignOut = () => {
     signOut(); // Déconnexion
@@ -228,28 +216,53 @@ export function Navbar({
       {showAlerts && (
         <div
           ref={alertsRef}
-          className="absolute right-0 mt-2 mr-4 w-80 bg-gray-800 rounded-lg shadow-lg z-50"
+          className="absolute right-0 mt-2 mr-4 w-80 bg-gray-800/95 rounded-lg shadow-lg shadow-black/50 backdrop-blur-sm border border-gray-700 z-50"
         >
           {/* Contenu des alertes */}
           <div className="p-4">
-            <h3 className="text-sm font-semibold text-gray-300 mb-2">
+            <h3 className="text-sm font-semibold text-gray-300 mb-3 px-1">
               {t('navbar.alerts', 'Alertes récentes')}
             </h3>
             {alerts.length === 0 ? (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 px-1">
                 {t('navbar.no_alerts', 'Aucune alerte')}
               </p>
             ) : (
               alerts.map((alert) => (
                 <div
                   key={alert.id}
-                  className={`p-2 mb-2 rounded ${alert.type === 'warning' ? 'bg-yellow-900/30 text-yellow-400' :
-                      alert.type === 'error' ? 'bg-red-900/30 text-red-400' :
-                        'bg-blue-900/30 text-blue-400'
-                    } text-xs`}
+                  onClick={() => {
+                    markAsRead(alert.id);
+                    setShowAlerts(false);
+                  }}
+                  className={`p-3 mb-2 rounded-md cursor-pointer transition-all duration-200 hover:opacity-80 ${
+                    alert.type === 'warning' 
+                      ? 'bg-gray-900/80 border-l-2 border-yellow-500 text-yellow-400' 
+                      : alert.type === 'error' 
+                        ? 'bg-gray-900/80 border-l-2 border-red-500 text-red-400' 
+                        : 'bg-gray-900/80 border-l-2 border-blue-500 text-blue-400'
+                  } text-xs relative`}
                 >
-                  <div className="font-semibold">{alert.title}</div>
-                  <div>{alert.message}</div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2 items-center">
+                      <div className="flex-shrink-0">
+                        {alert.type === 'warning' ? (
+                          <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                        ) : alert.type === 'error' ? (
+                          <AlertCircle className="h-4 w-4 text-red-400" />
+                        ) : (
+                          <Info className="h-4 w-4 text-blue-400" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-semibold">{alert.title}</div>
+                        <div>{alert.message}</div>
+                      </div>
+                    </div>
+                    {alert.read && (
+                      <CheckCircle className="h-4 w-4 text-green-500 ml-2 flex-shrink-0" />
+                    )}
+                  </div>
                 </div>
               ))
             )}
