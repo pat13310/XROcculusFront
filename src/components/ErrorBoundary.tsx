@@ -33,16 +33,16 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Something went wrong
+              Quelche chose s\'est mal passée
             </h2>
             <p className="text-gray-600 mb-4">
-              The application encountered an error. Please try refreshing the page.
+              Cette application a rencontré une erreur. Merci de rafraîchir la page.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-violet-700"
             >
-              Refresh Page
+              Rafraîchir Page
             </button>
           </div>
         </div>

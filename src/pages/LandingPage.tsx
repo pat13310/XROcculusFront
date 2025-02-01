@@ -2,7 +2,6 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { LoginModal } from '../components/LoginModal';
-import { useTranslation } from '../contexts/TranslationContext';
 import { useAuth } from '../hooks/useAuth';
 import { HeroSection } from '../components/HeroSection';
 import { Footer } from '../components/Footer';
@@ -24,7 +23,6 @@ const LoadingSkeleton = () => (
 export function LandingPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
   const { isAuthenticated, signOut } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 

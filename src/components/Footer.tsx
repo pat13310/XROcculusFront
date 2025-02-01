@@ -51,7 +51,7 @@ export function Footer() {
             <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
               {t('footer.contact', 'Contact')}
             </h3>
-            <ul className="space-y-4">
+            <ul className="space-y-2">
               <li className="flex items-center space-x-1.5">
                 <Mail className="h-3 w-3 text-gray-400" />
                 <a

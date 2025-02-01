@@ -82,7 +82,7 @@ export function HeroSection({ handleOpenLoginModal }: HeroSectionProps) {
                     </a>
                   </div>
 
-                 
+                
                 </div>
               </div>
             </div>

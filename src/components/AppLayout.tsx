@@ -43,11 +43,6 @@ export function AppLayout() {
     <Layout onNavigate={handleNavigate} currentPage={currentPage} deviceCount={stats.totalDevices}>
       {currentPage === 'dashboard' && (
         <DashboardPage 
-          stats={stats}
-          devices={devices}
-          devicesLoading={devicesLoading}
-          onSelectDevice={handleDeviceSelect}
-          onUninstallDevice={handleDeviceUninstall}
         />
       )}
       {currentPage === 'devices' && !devicesLoading && (
@@ -64,8 +59,6 @@ export function AppLayout() {
       {currentPage === 'reports' && <ReportsPage />}
       {currentPage === 'device-details' && selectedDevice && (
         <DeviceDetailsPage 
-          deviceId={selectedDevice}
-          onBack={() => setCurrentPage('devices')}
         />
       )}
     </Layout>

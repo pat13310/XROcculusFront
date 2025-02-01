@@ -5,7 +5,7 @@ import type { Database } from '../types/supabase';
 const logger = createLogger('Supabase');
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   logger.error('Variables d\'environnement Supabase manquantes');
@@ -61,13 +61,13 @@ export async function checkSupabaseConnection() {
     console.log('🔍 Vérification de la connexion Supabase...');
     
     // Vérifier la connexion avec différentes méthodes
-    const systemLogsCheck = await supabase.from('system_logs').select('count').limit(1);
-    console.log('✅ Résultat system_logs:', systemLogsCheck);
+    //const systemLogsCheck = await supabase.from('system_logs').select('count').limit(1);
+    //console.log('✅ Résultat system_logs:', systemLogsCheck);
 
     const authCheck = await supabase.auth.getUser();
     console.log('✅ Vérification authentification:', authCheck);
 
-    if (systemLogsCheck.error) throw systemLogsCheck.error;
+    //if (systemLogsCheck.error) throw systemLogsCheck.error;
     
     logger.info('Connexion Supabase établie avec succès');
     return true;

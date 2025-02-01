@@ -12,7 +12,7 @@ export function LoadingScreen({
   message = 'Chargement de l\'aplication...', 
   backgroundColor = 'bg-gray-100', 
   textColor = 'text-gray-700', 
-  spinnerColor = 'border-blue-500'
+  spinnerColor = 'border-violet-500'
 }: LoadingScreenProps) {
   return (
     <div className={`min-h-screen ${backgroundColor} flex items-center justify-center`}>
