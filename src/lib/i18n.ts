@@ -19,7 +19,7 @@ const resources = {
       'app.name': 'XR Manager',
       
       // Traductions de l'assistant en anglais
-      'assistant.title': 'XR Assistant',
+      'assistant.title': 'Assistant de connexion',
       'assistant.subtitle': 'Your personalized guide to XR management',
       // ... autres traductions similaires en anglais
     }

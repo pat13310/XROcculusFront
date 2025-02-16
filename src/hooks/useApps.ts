@@ -8,6 +8,7 @@ import type { Application } from '../types';
 const logger = createLogger('useApps');
 
 interface UserApp {
+  id: number;
   status: 'available' | 'installed';
   created_at: string | null;
   updated_at: string | null;
@@ -45,6 +46,7 @@ export function useApps() {
           .select(`
             *,
             applications_users!left (
+              id,
               status,
               created_at,
               updated_at
@@ -66,8 +68,9 @@ export function useApps() {
         }
 
         // Transformer les données
+        const userApps = data.map(app => app.applications_users?.[0]).filter(Boolean);
         const transformedApps: Application[] = data.map(app => {
-          const userApp: UserApp | undefined = app.applications_users?.[0];
+          const userApp: UserApp | undefined = userApps.find(ua => ua.id === app.id);
           return {
             id: app.id,
             name: app.name,
@@ -88,7 +91,10 @@ export function useApps() {
         setApps(transformedApps);
       } catch (error) {
         if (!mounted) return;
-        logger.error('Error loading apps:', error);
+        const errorRecord = error instanceof Error 
+          ? { message: error.message, name: error.name }
+          : { message: String(error) };
+        logger.error('Error loading apps:', errorRecord);
         setApps([]);
       } finally {
         if (mounted) {

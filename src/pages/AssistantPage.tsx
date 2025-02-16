@@ -35,7 +35,7 @@ export function AssistantPage() {
 
   const assistantSteps: AssistantStep[] = [
     {
-      title: t('assistant.welcome', 'Bienvenue dans votre Assistant XR'),
+      title: t('assistant.welcome', 'Bienvenue dans votre Assistant'),
       description: t('assistant.welcome_desc', 'Connecter d\'abord votre casque via le port USB.'),
       icon: <Usb className="w-6 h-6 text-indigo-500" />,
       image: casqueUSB,
