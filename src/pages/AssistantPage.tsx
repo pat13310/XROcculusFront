@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Wand2, ChevronRight, ChevronLeft, Usb, Wifi,  User, LandPlot, AlertCircle, CheckCircle, WifiOff } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Wand2, ChevronRight, ChevronLeft, Usb, Wifi, User, LandPlot, AlertCircle, CheckCircle, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import GradientHeader from '../components/GradientHeader';
 import { ConnectionModalContent } from '../components/ConnectionModalContent';
-import Modal from '../components/Modal'; // Import the Modal component
+import Modal from '../components/Modal'; 
+import { mqttService, MqttMessage } from '../services/mqtt';
+import { useMqtt } from '../hooks/useMqtt'; 
+import { createLogger } from '../utils/logger';
+
+const logger = createLogger('AssistantPage');
 
 // Importation dynamique des images
 import casqueUSB from '/images/casqueUSB.webp';
@@ -13,10 +18,12 @@ import casqueUser from '/images/casqueFinal.webp';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const MAX_MESSAGES = 50; // Nombre maximum de messages à conserver par topic
+
 export function AssistantPage() {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
-  const [usbConnectionStatus, setUsbConnectionStatus] = useState<'idle' | 'connecting' | 'success' | 'failure'>('idle');
+  const [usbConnectionStatus, setUsbConnectionStatus] = useState<'idle' | 'connecting' | 'success' | 'failure'|'disconnecting'>('idle');
   const [wifiConnectionStatus, setWifiConnectionStatus] = useState<"connecting" | "success" | "failure" | "idle">("idle");
   const [showUsbModal, setShowUsbModal] = useState(false);
   const [showWifiModal, setShowWifiModal] = useState(false);
@@ -25,6 +32,97 @@ export function AssistantPage() {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [wifiPassword, setWifiPassword] = useState('');
   const [showWifiSuccessModal, setShowWifiSuccessModal] = useState(false);
+  const [mqttStatus, setMqttStatus] = useState<'disconnected' | 'connected' | 'error'>('disconnected');
+
+  // État pour les messages MQTT avec useRef pour éviter les re-renders inutiles
+  const [mqttMessages, setMqttMessages] = useState<Record<string, string[]>>({
+    'device/status': [],
+    'device/config': [],
+    'device/data': [],
+    'device/infos': []
+  });
+
+  // Référence pour accéder aux derniers messages dans les callbacks
+  const mqttMessagesRef = useRef(mqttMessages);
+  useEffect(() => {
+    mqttMessagesRef.current = mqttMessages;
+  }, [mqttMessages]);
+
+  // Fonction pour mettre à jour les messages de manière optimisée
+  const updateMessages = useCallback((topic: string, message: MqttMessage) => {
+    const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
+    const timestamp = new Date().toISOString();
+    const formattedMessage = `[${timestamp}] ${messageStr}`;
+
+    setMqttMessages(prev => {
+      const currentMessages = prev[topic] || [];
+      const updatedMessages = [...currentMessages, formattedMessage];
+      
+      // Garder seulement les MAX_MESSAGES plus récents
+      if (updatedMessages.length > MAX_MESSAGES) {
+        return {
+          ...prev,
+          [topic]: updatedMessages.slice(-MAX_MESSAGES)
+        };
+      }
+
+      return {
+        ...prev,
+        [topic]: updatedMessages
+      };
+    });
+
+    logger.info('Message MQTT mis à jour', { topic, message: formattedMessage });
+  }, []);
+
+  // Utiliser le hook useMqtt
+  const { mqttStatus: hookMqttStatus, messages } = useMqtt(
+    wifiPassword ? `ws://${wifiPassword}:9001` : undefined,
+    [
+      'device/status',
+      'device/config',
+      'device/data',
+      'device/infos'
+    ]
+  );
+
+  // Observer les messages reçus avec useCallback
+  useEffect(() => {
+    if (!messages) return;
+
+    Object.entries(messages).forEach(([topic, message]) => {
+      logger.info('Message reçu dans AssistantPage', { topic, message });
+      
+      // Gérer les messages device/infos
+      if (topic === 'device/infos') {
+        const status = typeof message === 'string' ? message : JSON.stringify(message);
+        if (status === 'connected') {
+          setUsbConnectionStatus('success');
+        } else if (status === 'disconnected') {
+          setUsbConnectionStatus('disconnecting');
+        }
+        else{
+          setUsbConnectionStatus('idle');
+        }
+      }
+      
+      updateMessages(topic, message);
+    });
+  }, [messages, updateMessages]);
+
+  // Mettre à jour le statut MQTT
+  useEffect(() => {
+    setMqttStatus(hookMqttStatus);
+  }, [hookMqttStatus]);
+
+  // Fonction pour effacer les messages d'un topic
+  const clearTopicMessages = useCallback((topic: string) => {
+    setMqttMessages(prev => ({
+      ...prev,
+      [topic]: []
+    }));
+    logger.info('Messages effacés pour le topic', { topic });
+  }, []);
 
   interface AssistantStep {
     title: string;
@@ -60,11 +158,10 @@ export function AssistantPage() {
     }
   ];
 
-  const simulateUsbConnection = () => {
-    setShowUsbModal(true); // Forcer l'affichage de la modale
+  const executeUsbConnection = () => {
+    setShowUsbModal(true); 
     setUsbConnectionStatus('connecting');
     setTimeout(() => {
-      // Simulation aléatoire de succès ou d'échec (pour le test)
       const connectionSuccessful = Math.random() > 0.3;
 
       if (connectionSuccessful) {
@@ -78,63 +175,42 @@ export function AssistantPage() {
     }, 3000);
   };
 
-  const simulateWifiConnection = () => {
-    setShowWifiModal(true); // Forcer l'affichage de la modale
+  const executeWifiConnection = async () => {
+    console.log('Début executeWifiConnection');
+    setShowWifiModal(true);
     if (!isValidIpAddress(wifiPassword)) {
+      console.log('Adresse IP invalide:', wifiPassword);
       setWifiConnectionStatus('failure');
       return;
     }
 
     setWifiConnectionStatus('connecting');
-
-    setTimeout(() => {
-      // Simulation de la connexion avec une adresse IP
-      const connectionSuccessful =Math.random() > 0.3;
-
-      if (connectionSuccessful) {
-        setWifiConnectionStatus('success');
-        sleep(1000).then(() => {
-          setShowWifiModal(false);
-          // Afficher la modale de succès WiFi
-          setShowWifiSuccessModal(true);
-        });
-      } else {
-        setWifiConnectionStatus('failure');
-        setShowWifiSuccessModal(true);
-        // Afficher un message d'erreur dans la modale
-      }
-    }, 2000);
+    
+    // Le hook useMqtt gère maintenant la connexion automatiquement
+    // quand l'adresse IP change
   };
 
-  
   const setStep = (step: number) => {
     switch (step) {
       case 0:
-        // Connexion USB
-        simulateUsbConnection();
+        executeUsbConnection();
         break;
       case 1:
-        // Lance le test de connexion WiFi
-        simulateWifiConnection();
+        executeWifiConnection();
         break;
       case 2:
-        // Gestion des utilisateurs - Demande de nom d'utilisateur
         setShowUsernameModal(true);
         break;
       case 3:
-        // Étape finale
         finishSetup();
         break;
     }
   };
 
-  const handleNext = () => {
-  
-        // Pour toutes les autres étapes, progression normale
-        if (currentStep < assistantSteps.length - 1) {          
-          setStep(currentStep );
-        }
-    
+  const handleNext = () => {  
+    if (currentStep < assistantSteps.length - 1) {          
+      setStep(currentStep );
+    }    
   };
 
   const handlePrevious = () => {
@@ -157,11 +233,10 @@ export function AssistantPage() {
               onContinue={() => {
                 if (usbConnectionStatus === 'success') {
                   setShowUsbModal(false);
-                  // Passer à l'étape WiFi uniquement si la connexion USB est un succès
                   setCurrentStep(1);
                 }
               }}
-              onRetry={simulateUsbConnection}
+              onRetry={executeUsbConnection}
               onCancel={() => setShowUsbModal(false)} />
           </div>
         </div>
@@ -210,7 +285,7 @@ export function AssistantPage() {
               {t('common.cancel', 'Annuler')}
             </button>
             <button
-              onClick={simulateWifiConnection}
+              onClick={executeWifiConnection}
               disabled={!isValidIpAddress(wifiPassword)}
               className={`px-4 py-2 rounded ${isValidIpAddress(wifiPassword)
                   ? 'bg-indigo-500 text-white hover:bg-indigo-600'
@@ -240,12 +315,12 @@ export function AssistantPage() {
           onContinue={() => {
             if (wifiConnectionStatus === 'success') {
               setShowWifiSuccessModal(false);
-              setCurrentStep(currentStep + 1); // Aller à l'étape suivante
+              setCurrentStep(currentStep + 1); 
             }
           }}
           onRetry={() => {
             setShowWifiSuccessModal(false);
-            simulateWifiConnection();
+            executeWifiConnection();
           }}
           onCancel={() => setShowWifiSuccessModal(false)}
         />
@@ -322,20 +397,135 @@ export function AssistantPage() {
 
   const currentStepData = assistantSteps[currentStep];
 
+  const connectToMqtt = async () => {
+    try {
+      await mqttService.connect('ws://localhost:9001'); 
+      setMqttStatus('connected');
+      
+      mqttService.subscribe('device/status', (message: MqttMessage) => {
+        console.log('Device status:', message);
+      });
+
+      mqttService.subscribe('device/connection', (message: MqttMessage) => {
+        console.log('Device connection:', message);
+      });
+
+    } catch (error) {
+      setMqttStatus('error');
+      const errorRecord = error instanceof Error 
+        ? { message: error.message, name: error.name }
+        : { message: String(error) };
+      console.error('Erreur de connexion MQTT:', errorRecord);
+    }
+  };
+
+  useEffect(() => {
+    connectToMqtt();
+
+    return () => {
+      mqttService.disconnect();
+    };
+  }, []); 
+
+  const renderStepContent = (step: AssistantStep) => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <div className="flex flex-col items-center space-y-4">
+            <div className="text-center">
+              {usbConnectionStatus === 'success' && (
+                <div className="text-green-600 font-medium flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>USB connecté avec le casque</span>
+                </div>
+              )}
+              {usbConnectionStatus === 'disconnecting' && (
+                <div className="text-orange-600 font-medium flex items-center space-x-2">
+                  <AlertCircle className="w-5 h-5" />
+                  <span>Casque déconnecté</span>
+                </div>
+              )}
+              {usbConnectionStatus === 'idle' && (
+                <div className="text-gray-600">
+                  Connecter d'abord votre casque via le port USB
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex flex-col items-center space-y-4">
+            <div className="text-center">
+              <div className="text-gray-600">
+                {currentStepData.description}
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100 overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gray-100 ">
        <GradientHeader
           titleKey="assistant.title"
           defaultTitle="Assistant de connexion"
-          Icon={Wand2} />
+          Icon={Wand2}
+          rightContent={
+            <div className="flex items-center h-full">
+              <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                mqttStatus === 'connected' ? 'bg-green-500' :
+                mqttStatus === 'error' ? 'bg-red-500' :
+                'bg-gray-500'
+              }`} />
+              <span className="text-sm text-gray-600">
+                {mqttStatus === 'connected' ? t('server.status.connected', 'Serveur Connecté') :
+                 mqttStatus === 'error' ? t('server.status.error', 'Erreur du serveur') :
+                 t('server.status.disconnected', 'Serveur Déconnecté')}
+              </span>
+            </div>
+          } />
 
-      <div className="container md:mx-16  px-0 py-0 max-w-3xl">
-       
+      <div className="container md:mx-16  px-0 py-0 max-w-3xl">       
         {renderUsbConnectionModal()}
         {renderWifiConnectionModal()}
         {renderWifiSuccessModal()}
         {renderUsernameModal()}
         {renderCompletionModal()}
+
+        {mqttStatus === 'connected' && (
+          <div className="mt-4 p-4 bg-white rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4">Messages MQTT</h2>
+            <div className="space-y-4">
+              {Object.entries(mqttMessages).map(([topic, messages]) => (
+                <div key={topic} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-medium text-blue-600">{topic}</h3>
+                    <button
+                      onClick={() => clearTopicMessages(topic)}
+                      className="text-sm text-gray-500 hover:text-red-500"
+                    >
+                      Effacer
+                    </button>
+                  </div>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {messages.map((msg, index) => (
+                      <div key={index} className="bg-gray-50 p-2 rounded text-sm">
+                        {msg}
+                      </div>
+                    ))}
+                    {messages.length === 0 && (
+                      <div className="text-gray-500 italic">
+                        Aucun message reçu
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="bg-white shadow-lg rounded-lg p-2 text-center">
           <div className="flex flex-col items-center mb-3">
@@ -355,29 +545,32 @@ export function AssistantPage() {
               <h2 className="text-xl font-bold text-gray-600">{currentStepData.title}</h2>
             </div>
           </div>
-          <div><p className="text-gray-500 mb-6">{currentStepData.description}</p>
-          </div>
-
-          {currentStep === 1}
-
-          <div className="flex justify-between">
+          {renderStepContent(currentStepData)}
+          <div className="flex justify-between mt-8">
             {currentStep > 0 && (
               <button
                 onClick={handlePrevious}
-                className="flex items-center text-violet-500 hover:text-violet-700"
+                className="flex items-center text-violet-500 hover:text-violet-700 py-2"
               >
                 <ChevronLeft className="mr-2" /> {t('assistant.previous', 'Précédent')}
               </button>
             )}
 
-            {currentStep < assistantSteps.length - 1 ? (
+            {currentStep < assistantSteps.length - 1 && (
               <button
                 onClick={handleNext}
-                className="flex items-center ml-auto text-violet-500 hover:text-violet-700 py-2 "
+                disabled={usbConnectionStatus !== 'success'}
+                className={`flex items-center ml-auto py-2 ${
+                  usbConnectionStatus === 'success'
+                    ? 'text-violet-500 hover:text-violet-700'
+                    : 'text-gray-400 cursor-not-allowed'
+                }`}
               >
                 {t('assistant.next', 'Suivant')} <ChevronRight className="ml-2" />
               </button>
-            ) : (
+            )}
+
+            {currentStep === assistantSteps.length - 1 && (
               <button
                 onClick={finishSetup}
                 className="bg-violet-500 text-white px-4 py-2 rounded hover:bg-violet-600"

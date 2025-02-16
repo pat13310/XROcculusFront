@@ -3,7 +3,7 @@ import { CheckCircle, AlertCircle, Usb, Wifi, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface ConnectionModalContentProps {
-  status: 'connecting' | 'success' | 'failure' | 'idle';
+  status: 'connecting' | 'success' | 'failure' | 'idle'|'disconnecting';
   type: 'usb' | 'wifi';
   onContinue?: () => void;
   onRetry?: () => void;
