@@ -11,9 +11,14 @@ const logger = createLogger('AppLayout');
 interface DeviceSelectionProps {
   onSelectDevice?: (deviceId: string) => void;
   onUninstallDevice?: (deviceId: string) => void;
+  localIp?: string | null;
 }
 
-export function AppLayout({ onSelectDevice = (deviceId: string) => {}, onUninstallDevice = (deviceId: string) => {} }: DeviceSelectionProps = {}) {
+export function AppLayout({ 
+  onSelectDevice = (deviceId: string) => {}, 
+  onUninstallDevice = (deviceId: string) => {},
+  localIp = null 
+}: DeviceSelectionProps = {}) {
   const { devices, stats, loading: devicesLoading } = useDevices();
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
@@ -41,7 +46,17 @@ export function AppLayout({ onSelectDevice = (deviceId: string) => {}, onUninsta
   };
 
   return (
-    <Layout onNavigate={handleNavigate} currentPage={currentPage} deviceCount={stats.totalDevices}>
+    <Layout
+      devices={devices}
+      stats={stats}
+      loading={devicesLoading}
+      selectedDevice={selectedDevice}
+      onDeviceSelect={handleDeviceSelect}
+      onDeviceUninstall={handleDeviceUninstall}
+      currentPage={currentPage}
+      onPageChange={handleNavigate}
+      localIp={localIp}
+    >
       <Outlet context={{ 
         stats, 
         devices, 

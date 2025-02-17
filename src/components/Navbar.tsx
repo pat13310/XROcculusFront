@@ -8,17 +8,9 @@ import { FiLogOut } from 'react-icons/fi';
 import { LoginModal } from './LoginModal';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import type { Page } from '../hooks/useNavigation';
 
 const logger = createLogger('Navbar');
-
-interface NavbarProps {
-  onToggleSidebar: () => void;
-  onNavigate: (page: 'dashboard' | 'settings' | 'devices' | 'device-details' | 'analytics' | 'users' | 'reports' | 'applications') => void;
-  currentPage: 'dashboard' | 'settings' | 'devices' | 'device-details' | 'analytics' | 'users' | 'reports' | 'applications';
-  isAuthenticated: boolean;
-  onSignOut: () => void;
-  onLogin?: () => void;
-}
 
 interface Alert {
   id: string;
@@ -29,127 +21,88 @@ interface Alert {
   read: boolean;
 }
 
+interface NavbarProps {
+  onToggleSidebar: () => void;
+  onNavigate: (page: Page) => void;
+  currentPage: Page;
+  isAuthenticated: boolean;
+  onSignOut: () => void;
+  onLogin?: () => void;
+  localIp: string | null;
+}
+
 export function Navbar({
   onToggleSidebar,
   onNavigate,
   currentPage,
   isAuthenticated,
   onLogin,
-  onSignOut
+  onSignOut,
+  localIp
 }: NavbarProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
-  const { signOut } = useAuth(); // Utiliser le hook useAuth directement
-  const [alerts, setAlerts] = useState<Alert[]>([]);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const alertsRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchAlerts = async () => {
-      // Ne récupérer les alertes que si l'utilisateur est connecté
-      if (!isAuthenticated) {
-        setAlerts([]);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('alerts')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (error) throw error;
-        setAlerts(data || []);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-        logger.error('Erreur lors du chargement des alertes:', errorMessage.toString);
-      }
-    };
-
-    fetchAlerts();
-
-    const alertsSubscription = supabase
-      .channel('alerts-channel')
-      .on('postgres_changes',
-        { event: '*', schema: 'public', table: 'alerts' },
-        fetchAlerts
-      )
-      .subscribe();
-
-    return () => {
-      alertsSubscription.unsubscribe();
-    };
-  }, [isAuthenticated]);
-
-  // Gestionnaire de clic en dehors du menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        alertsRef.current &&
-        buttonRef.current &&
-        !alertsRef.current.contains(event.target as Node) &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
+      if (alertsRef.current && buttonRef.current && 
+          !alertsRef.current.contains(event.target as Node) &&
+          !buttonRef.current.contains(event.target as Node)) {
         setShowAlerts(false);
       }
     };
 
-    if (showAlerts) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showAlerts]);
+  }, []);
 
-  const markAsRead = async (alertId: string) => {
+  const handleSignOut = async () => {
     try {
-      const { error } = await supabase
-        .from('alerts')
-        .update({ read: true })
-        .eq('id', alertId);
-
-      if (error) throw error;
-
-      setAlerts(alerts.map(alert =>
-        alert.id === alertId ? { ...alert, read: true } : alert
-      ));
+      onSignOut();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-      logger.error('Erreur lors du marquage de l\'alerte comme lue:', errorMessage.toString);
+      const errorRecord = error instanceof Error 
+        ? { message: error.message, name: error.name }
+        : { message: String(error) };
+      logger.error('Erreur lors de la déconnexion:', errorRecord);
     }
   };
 
- 
-
-  const handleSignOut = () => {
-    signOut(); // Déconnexion
-
-    // Forcer la navigation vers la page d'accueil
-    window.location.href = '/'; // Rechargement complet de la page
+  const getAlertIcon = (type: Alert['type']) => {
+    switch (type) {
+      case 'info':
+        return <Info className="h-5 w-5 text-blue-400" />;
+      case 'warning':
+        return <AlertTriangle className="h-5 w-5 text-yellow-400" />;
+      case 'error':
+        return <AlertCircle className="h-5 w-5 text-red-400" />;
+      default:
+        return <CheckCircle className="h-5 w-5 text-green-400" />;
+    }
   };
 
   return (
-    <nav className="bg-gray-900 text-gray-100 shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="w-full bg-gray-900 text-gray-100 shadow-md">
+      <div className="w-full px-4">
         <div className="flex justify-between h-16 items-center">
           {/* Logo et bouton sidebar */}
           <div className="flex items-center space-x-2 xs:space-x-1">
             <button
               onClick={onToggleSidebar}
-              className="block xl:hidden text-gray-400 hover:text-gray-200 focus:outline-none xs:mr-1"
+              className="text-gray-400 hover:text-gray-200 focus:outline-none lg:hidden"
             >
               <Menu className="h-6 w-6 xs:h-4 xs:w-4" />
             </button>
 
             <div className="flex items-center space-x-2 xs:space-x-1">
               <img
-                src="/images/horus2.svg"
+                src="images/horus2.svg"
                 alt="Logo"
                 className="h-11 w-11 xs:h-4 xs:w-4"
               />
@@ -159,9 +112,8 @@ export function Navbar({
             </div>
           </div>
 
-          {/* Navigation et actions */}
-          <div className="flex items-center space-x-4 xs:space-x-2">
-            {/* Notifications */}
+          {/* Partie droite */}
+          <div className="flex items-center space-x-4">
             <button
               ref={buttonRef}
               onClick={() => setShowAlerts(!showAlerts)}
@@ -169,15 +121,16 @@ export function Navbar({
             >
               <Bell className="h-5 w-5 xs:h-4 xs:w-4" />
               {alerts.filter(alert => !alert.read).length > 0 && (
-                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 xs:h-1.5 xs:w-1.5"></span>
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  {alerts.filter(alert => !alert.read).length}
+                </span>
               )}
             </button>
 
-            {/* Boutons de navigation */}
-            <div className="flex space-x-2 xs:space-x-1">
+            <div className="flex items-center space-x-2">
               {isAuthenticated ? (
                 <>
-                  <button 
+                  <button
                     onClick={() => {
                       onNavigate('settings');
                       navigate('/settings');
@@ -208,15 +161,20 @@ export function Navbar({
                 </>
               )}
             </div>
+            {localIp && (
+              <div className="text-sm text-gray-400">
+                IP: {localIp}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Menu des alertes */}
+      {/* Panneau des alertes */}
       {showAlerts && (
         <div
           ref={alertsRef}
-          className="absolute right-0 mt-2 mr-4 w-80 bg-gray-800/95 rounded-lg shadow-lg shadow-black/50 backdrop-blur-sm border border-gray-700 z-50"
+          className="absolute right-0 mt-2 w-96 bg-gray-800 rounded-md shadow-lg overflow-hidden z-50"
         >
           {/* Contenu des alertes */}
           <div className="p-4">
@@ -224,58 +182,42 @@ export function Navbar({
               {t('navbar.alerts', 'Alertes récentes')}
             </h3>
             {alerts.length === 0 ? (
-              <p className="text-xs text-gray-500 px-1">
+              <p className="text-sm text-gray-400 px-1">
                 {t('navbar.no_alerts', 'Aucune alerte')}
               </p>
             ) : (
-              alerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  onClick={() => {
-                    markAsRead(alert.id);
-                    setShowAlerts(false);
-                  }}
-                  className={`p-3 mb-2 rounded-md cursor-pointer transition-all duration-200 hover:opacity-80 ${
-                    alert.type === 'warning' 
-                      ? 'bg-gray-900/80 border-l-2 border-yellow-500 text-yellow-400' 
-                      : alert.type === 'error' 
-                        ? 'bg-gray-900/80 border-l-2 border-red-500 text-red-400' 
-                        : 'bg-gray-900/80 border-l-2 border-blue-500 text-blue-400'
-                  } text-xs relative`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-2 items-center">
-                      <div className="flex-shrink-0">
-                        {alert.type === 'warning' ? (
-                          <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                        ) : alert.type === 'error' ? (
-                          <AlertCircle className="h-4 w-4 text-red-400" />
-                        ) : (
-                          <Info className="h-4 w-4 text-blue-400" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-semibold">{alert.title}</div>
-                        <div>{alert.message}</div>
+              <div className="space-y-2">
+                {alerts.map((alert) => (
+                  <div
+                    key={alert.id}
+                    className={`p-3 rounded-lg ${
+                      !alert.read ? 'bg-gray-700' : 'bg-gray-800'
+                    }`}
+                  >
+                    <div className="flex items-start">
+                      {getAlertIcon(alert.type)}
+                      <div className="ml-3 flex-1">
+                        <p className="text-sm font-medium text-gray-200">
+                          {alert.title}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-400">
+                          {alert.message}
+                        </p>
                       </div>
                     </div>
-                    {alert.read && (
-                      <CheckCircle className="h-4 w-4 text-green-500 ml-2 flex-shrink-0" />
-                    )}
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </div>
       )}
+
+      {/* Modal de connexion */}
       {showLoginModal && (
         <LoginModal
           onClose={() => setShowLoginModal(false)}
-          onLoginSuccess={() => {
-            setShowLoginModal(false);
-            onNavigate('dashboard');
-          }}
+          onLogin={onLogin}
         />
       )}
     </nav>

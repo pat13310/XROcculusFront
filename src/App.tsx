@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AppLayout } from './components/app/AppLayout';
 import { LandingPage } from './pages/LandingPage';
@@ -17,9 +17,11 @@ import { TranslationProvider } from './contexts/TranslationContext';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useIP } from './hooks/useIP';
 
 export default function App() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { ip, loading: ipLoading, error: ipError } = useIP();
 
   console.log('App Authentication State:', { 
     isAuthenticated, 
@@ -36,8 +38,12 @@ export default function App() {
     console.log('Device uninstalled:', deviceId);
   };
 
-  if (isLoading) {
+  if (isLoading || ipLoading) {
     return <div>Chargement...</div>;
+  }
+
+  if (ipError) {
+    console.error('Erreur lors de la récupération de l\'IP:', ipError);
   }
 
   return (

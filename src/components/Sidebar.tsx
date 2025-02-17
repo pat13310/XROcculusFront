@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Home,
   Smartphone,
@@ -13,130 +14,148 @@ import { NavLink } from 'react-router-dom';
 import { useTranslation } from '../contexts/TranslationContext';
 import { createLogger } from '../utils/logger';
 import { UserProfileSidebar } from './UserProfileSidebar';
+import type { Page } from '../hooks/useNavigation';
+import type { Device } from '../types';
 
 const logger = createLogger('Sidebar');
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  deviceCount: number;
-  onDeviceSelect?: (deviceId: string) => void;
+  devices: Device[];
+  loading: boolean;
+  selectedDevice: string | null;
+  onDeviceSelect: (deviceId: string) => void;
+  onDeviceUninstall: (deviceId: string) => void;
+  currentPage: Page;
+  onPageChange: (page: Page) => void;
 }
 
 export function Sidebar({
   isOpen,
   onClose,
-  deviceCount,
+  devices,
+  loading,
+  selectedDevice,
   onDeviceSelect,
+  onDeviceUninstall,
+  currentPage,
+  onPageChange,
 }: SidebarProps) {
   const { t } = useTranslation();
 
-  const menuItems = [
+  const menuItems: Array<{
+    icon: any;
+    label: string;
+    page: Page;
+    count?: number;
+  }> = [
     {
       icon: Home,
       label: t('sidebar.dashboard', 'Tableau de bord'),
-      to: '/dashboard',
+      page: 'dashboard',
     },
     {
       icon: Smartphone,
       label: t('sidebar.devices', 'Appareils'),
-      to: '/devices',
-      count: deviceCount,
+      page: 'devices',
+      count: devices.length,
     },
     {
       icon: Box,
       label: t('sidebar.applications', 'Applications'),
-      to: '/applications',
+      page: 'applications',
     },
     {
       icon: Users,
       label: t('sidebar.users', 'Utilisateurs'),
-      to: '/users',
+      page: 'users',
     },
     {
       icon: User,
       label: t('sidebar.profile', 'Profil'),
-      to: '/profile',
+      page: 'profile',
     },
     {
       icon: FileText,
       label: t('sidebar.reports', 'Rapports'),
-      to: '/reports',
+      page: 'reports',
     },
     {
       icon: Wand2,
       label: t('sidebar.assistant', 'Assistant'),
-      to: '/assistant',
+      page: 'assistant',
     },
     {
       icon: Settings,
       label: t('sidebar.settings', 'Paramètres'),
-      to: '/settings',
+      page: 'settings',
     },
   ];
 
+  const handleNavigation = (page: Page) => {
+    logger.info('Navigation sidebar', { from: currentPage, to: page });
+    onPageChange(page);
+    onClose();
+  };
+
   return (
-    <aside 
+    <aside
       className={`
-        fixed inset-y-0 left-0 z-30 w-72 bg-white shadow-lg 
-        transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-30 w-56 bg-gray-900 text-white
+        transform transition-transform duration-300 ease-in-out h-full
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:relative lg:translate-x-0
       `}
     >
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">Menu</h2>
-          <button 
-            onClick={onClose} 
-            className="lg:hidden text-gray-600 hover:text-gray-900"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto">
-          {/* Profil utilisateur en haut de la sidebar */}
-          <UserProfileSidebar />
-
-          <nav className="space-y-1 px-2 py-4">
-            {menuItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => `
-                  group flex items-center px-2 py-2 text-sm font-medium rounded-md
-                  ${isActive 
-                    ? 'bg-indigo-100 text-indigo-900' 
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
-                `}
-                onClick={(e) => {
-                  if (item.label === t('sidebar.devices', 'Appareils') && onDeviceSelect) {
-                    e.preventDefault(); // Empêche la navigation par défaut
-                    // Vous pouvez implémenter une logique de sélection d'appareil ici
-                    // Par exemple, ouvrir une modal de sélection d'appareil
-                    onDeviceSelect('default-device-id'); // À remplacer par une vraie logique
-                  }
-                }}
+        <div className="flex items-center justify-between px-3 border-b border-gray-700 py-0">
+          {isOpen && (
+            <>
+              <h2 className="text-sm font-semibold text-gray-300 lg:hidden py-5">Menu</h2>
+              <button
+                onClick={onClose}
+                className="lg:hidden p-1 rounded-md hover:bg-gray-800 text-gray-400 hover:text-gray-200"
               >
-                <item.icon 
-                  className={`
-                    mr-3 h-5 w-5 
-                    ${item.label === t('sidebar.devices', 'Appareils') 
-                      ? 'text-indigo-500 group-hover:text-indigo-600' 
-                      : 'text-gray-400 group-hover:text-gray-500'}
-                  `} 
-                />
-                {item.label}
-                {item.count !== undefined && (
-                  <span className="ml-auto bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs">
-                    {item.count}
-                  </span>
-                )}
-              </NavLink>
-            ))}
-          </nav>
+                <span className="sr-only">Fermer le menu</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </>
+          )}
         </div>
+
+        <nav className="flex-1 px-2 py-1 overflow-y-auto">
+          <div className="flex-shrink-0 pt-2 pb-6">
+            <UserProfileSidebar />
+          </div>
+          <ul className="space-y-0.5">
+            {menuItems.map((item) => (
+              <li key={item.page}>
+                <NavLink
+                  to={`/${item.page}`}
+                  onClick={() => handleNavigation(item.page)}
+                  className={({ isActive }) =>
+                    `flex items-center h-7 px-2 rounded-lg transition-colors duration-150 text-sm
+                    ${isActive
+                      ? 'bg-gray-800 text-white'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }`
+                  }
+                >
+                  <item.icon className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                  {item.count !== undefined && (
+                    <span className="ml-auto bg-gray-800 text-gray-200 px-1.5 py-0.5 rounded-full text-xs flex-shrink-0">
+                      {item.count}
+                    </span>
+                  )}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </aside>
   );

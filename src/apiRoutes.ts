@@ -21,43 +21,51 @@ export interface UserCreationData {
 }
 
 export class ApiRoutes {
-  private baseUrl: string;
+  private _baseUrl: string;
 
   constructor(baseUrl: string = 'http://localhost:8000') {
-    this.baseUrl = baseUrl;
+    this._baseUrl = baseUrl;
   }
 
-  async login(credentials: LoginCredentials): Promise<ApiTestResult> {
-    try {
-      console.log(' Tentative de login');
-      const response = await axios.post(`${this.baseUrl}/login`, 
-        qs.stringify(credentials), 
-        {
-          timeout: 5000,
-          validateStatus: (status) => status >= 200 && status < 500,
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }
-      );
+  get baseUrl(): string {
+    return this._baseUrl;
+  }
+
+  set baseUrl(url: string) {
+    this._baseUrl = url;
+  }
+
+  // async login(credentials: LoginCredentials): Promise<ApiTestResult> {
+  //   try {
+  //     console.log(' Tentative de login');
+  //     const response = await axios.post(`${this._baseUrl}/login`, 
+  //       qs.stringify(credentials), 
+  //       {
+  //         timeout: 5000,
+  //         validateStatus: (status) => status >= 200 && status < 500,
+  //         headers: {
+  //           'Content-Type': 'application/x-www-form-urlencoded'
+  //         }
+  //       }
+  //     );
       
-      console.log(` Statut de login : ${response.status}`);
-      console.log(' Détails de la réponse de login :', JSON.stringify(response.data, null, 2));
+  //     console.log(` Statut de login : ${response.status}`);
+  //     console.log(' Détails de la réponse de login :', JSON.stringify(response.data, null, 2));
 
-      return {
-        status: response.status,
-        data: response.data
-      };
-    } catch (error) {
-      console.error(' Erreur de login :', error);
-      throw error;
-    }
-  }
+  //     return {
+  //       status: response.status,
+  //       data: response.data
+  //     };
+  //   } catch (error) {
+  //     console.error(' Erreur de login :', error);
+  //     throw error;
+  //   }
+  // }
 
   async getDevicesList(token: string): Promise<ApiTestResult> {
     try {
       console.log(' Tentative d\'accès à /devices/list');
-      const response = await axios.get(`${this.baseUrl}/devices/list`, {
+      const response = await axios.get(`${this._baseUrl}/devices/list`, {
         timeout: 5000,
         validateStatus: (status) => status >= 200 && status < 500,
         headers: {
@@ -81,7 +89,7 @@ export class ApiRoutes {
   async getUsersList(token: string): Promise<ApiTestResult> {
     try {
       console.log(' Tentative d\'accès à /users/list');
-      const response = await axios.get(`${this.baseUrl}/users/list`, {
+      const response = await axios.get(`${this._baseUrl}/users/list`, {
         timeout: 5000,
         validateStatus: (status) => status >= 200 && status < 500,
         headers: {
@@ -104,8 +112,8 @@ export class ApiRoutes {
 
   async ping(): Promise<ApiTestResult> {
     try {
-      console.log(` Tentative de connexion à : ${this.baseUrl}`);
-      const response = await axios.get(this.baseUrl, {
+      console.log(` Tentative de connexion à : ${this._baseUrl}`);
+      const response = await axios.get(this._baseUrl, {
         timeout: 5000,
         validateStatus: (status) => status === 200 || status === 404
       });
@@ -125,7 +133,7 @@ export class ApiRoutes {
   async createUser(token: string, userData: UserCreationData): Promise<ApiTestResult> {
     try {
       console.log(' Tentative de création d\'utilisateur');
-      const response = await axios.post(`${this.baseUrl}/users/add`, 
+      const response = await axios.post(`${this._baseUrl}/users/add`, 
         userData,
         {
           timeout: 5000,
@@ -149,36 +157,24 @@ export class ApiRoutes {
       throw error;
     }
   }
+
+  async getIpAddress(token: string=""): Promise<string> {
+    try {
+      const response = await axios.get(`${this._baseUrl}/auth/whoami`, {
+        timeout: 5000,
+        validateStatus: (status) => status >= 200 && status < 500,
+      });
+      return response.data.ip;
+    } catch (error) {
+      const errorRecord = error instanceof Error 
+        ? { message: error.message, name: error.name }
+        : { message: String(error) };
+      console.error('Erreur lors de la récupération de l\'IP:', errorRecord);
+      throw error;
+    }
+  }
 }
 
 const apiRoutesInstance = new ApiRoutes();
 
-export const createUser = async (token: string, userData: UserCreationData): Promise<ApiTestResult> => {
-  try {
-    console.log(' Tentative de création d\'utilisateur');
-    const response = await axios.post(`http://localhost:8000/users/add`, 
-      userData,
-      {
-        timeout: 5000,
-        validateStatus: (status) => status >= 200 && status < 500,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    console.log(` Statut création d'utilisateur : ${response.status}`);
-    console.log(' Détails de la réponse :', JSON.stringify(response.data, null, 2));
-
-    return {
-      status: response.status,
-      data: response.data
-    };
-  } catch (error) {
-    console.error(' Erreur lors de la création d\'utilisateur :', error);
-    throw error;
-  }
-};
-
-export default { apiRoutesInstance, createUser };
+export default apiRoutesInstance;
