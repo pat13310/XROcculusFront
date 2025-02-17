@@ -399,16 +399,18 @@ export function AssistantPage() {
 
   const connectToMqtt = async () => {
     try {
-      await mqttService.connect('ws://localhost:9001'); 
+      await mqttService.connect('ws://192.168.90.189:9001'); 
       setMqttStatus('connected');
       
-      mqttService.subscribe('device/status', (message: MqttMessage) => {
+      mqttService.subscribe('devices/status', (message: MqttMessage) => {
         console.log('Device status:', message);
       });
 
-      mqttService.subscribe('device/connection', (message: MqttMessage) => {
+      mqttService.subscribe('devices/connection', (message: MqttMessage) => {
         console.log('Device connection:', message);
       });
+
+      mqttService.publish("devices/init", "get_id")
 
     } catch (error) {
       setMqttStatus('error');
