@@ -217,7 +217,11 @@ export function Navbar({
       {showLoginModal && (
         <LoginModal
           onClose={() => setShowLoginModal(false)}
-          onLogin={onLogin}
+          onLoginSuccess={() => {
+            setShowLoginModal(false);
+            if (onLogin) onLogin();
+          }}
+          onNavigate={onNavigate}
         />
       )}
     </nav>
