@@ -59,14 +59,13 @@ export function LoginModal({
       const result = await signIn(username, password);
 
       if (result.success) {
-        // Attendre un court instant pour que l'état d'authentification soit mis à jour
-        setTimeout(() => {
-          toast.success(`Bienvenue, ${result.user.username}!`);
-          onLoginSuccess();
-          if (onNavigate) {
-            onNavigate('dashboard');
-          }
-        }, 100);
+        toast.success(`Bienvenue, ${result.user.username}!`);
+        // Attendre un court instant pour que le token soit bien enregistré
+        await new Promise(resolve => setTimeout(resolve, 100));
+        onLoginSuccess();
+        if (onNavigate) {
+          onNavigate('dashboard');
+        }
       } else {
         setError(result.error || 'Erreur de connexion');
         toast.error(result.error || 'La connexion a échoué');

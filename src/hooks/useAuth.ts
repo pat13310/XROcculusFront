@@ -13,10 +13,7 @@ const loginSchema = Yup.object().shape({
   password: Yup.string()
     .required('Le mot de passe est obligatoire')
     .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
-    // .matches(/[A-Z]/, 'Le mot de passe doit contenir une majuscule')
     .matches(/[a-z]/, 'Le mot de passe doit contenir une minuscule')
-    // .matches(/[0-9]/, 'Le mot de passe doit contenir un chiffre')
-    // .matches(/[!@#$%^&*()]/, 'Le mot de passe doit contenir un caractère spécial')
 });
 
 interface AuthState {
@@ -34,16 +31,6 @@ export function useAuth() {
     isAuthenticated: false,
     isLoading: true
   });
-
-  // Effet pour gérer la navigation après authentification
-  // Supprimé car il causait une redirection systématique vers le dashboard
-  // useEffect(() => {
-  //   if (state.isAuthenticated && state.user) {
-  //     const path = state.user.role === 'admin' ? '/dashboard' : '/dashboard';
-  //     console.log('Navigation automatique vers:', path);
-  //     navigate(path);
-  //   }
-  // }, [state.isAuthenticated, state.user, navigate]);
 
   const getToken = () => localStorage.getItem('token');
   const setToken = (token: string) => localStorage.setItem('token', token);
@@ -85,7 +72,6 @@ export function useAuth() {
       console.log('Token reçu:', !!token);
       console.log('Informations utilisateur:', user);
 
-      // Validation du token et de l'utilisateur
       if (!token || !user) {
         console.error('Token ou utilisateur manquant');
         setState({
@@ -122,6 +108,7 @@ export function useAuth() {
         success: true,
         user: user
       };
+
     } catch (axiosError: unknown) {
       console.error('Erreur de connexion complète:', axiosError);
       
@@ -161,32 +148,6 @@ export function useAuth() {
     navigate('/');
   }, [navigate]);
 
-  const forgotPassword = async (email: string) => {
-    let result:any;
-    try {
-        result = await axios.post(`${baseUrl}/auth/forgot-password`, 
-        { email },
-        { 
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        }
-      );
-      
-      return {
-        success: true,
-        message: result.data.message || 'Un email de réinitialisation a été envoyé'
-      };
-    } catch (error: any) {
-      console.error('Erreur lors de la demande de réinitialisation:', error);
-      return {
-        success: false,
-        message: result.details || 'Une erreur est survenue'
-      };
-    }
-  };
-
   useEffect(() => {
     const token = getToken();
 
@@ -217,6 +178,7 @@ export function useAuth() {
           isLoading: false
         });
       }
+
     } else {
       setState({
         user: null,
@@ -224,13 +186,13 @@ export function useAuth() {
         isLoading: false
       });
     }
+
   }, [navigate]);
 
   return {
     ...state,
     signIn,
     signOut,
-    forgotPassword,
     getToken,
     isTokenValid
   };
